@@ -1,0 +1,17 @@
+<configuration>
+    <variable name="LOG_LEVEL" value="${LOG_LEVEL:-DEBUG}" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%level] [%logger{36}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.highloadinvest" level="${LOG_LEVEL}" />
+    <logger name="io.ktor" level="INFO" />
+    <logger name="org.eclipse.jetty" level="WARN" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
