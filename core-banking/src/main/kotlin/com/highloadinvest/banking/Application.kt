@@ -1,15 +1,12 @@
 package com.highloadinvest.banking
 
-import com.highloadinvest.banking.infrastructure.di.appModule
-import com.highloadinvest.banking.infrastructure.postgres.DatabaseFactory
+import com.highloadinvest.banking.application.usecases.ExecuteTrade
+import com.highloadinvest.banking.application.usecases.GetPortfolio
+import com.highloadinvest.banking.infrastructure.postgres.*
 import com.highloadinvest.banking.presentation.plugins.*
-import com.highloadinvest.banking.presentation.routes.healthRoutes
-import com.highloadinvest.banking.presentation.routes.portfolioRoutes
-import com.highloadinvest.banking.presentation.routes.tradeRoutes
+import com.highloadinvest.banking.presentation.routes.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import org.koin.ktor.plugin.Koin
-import org.koin.logger.slf4jLogger
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("com.highloadinvest.banking.Application")
@@ -24,10 +21,13 @@ fun Application.module() {
 
     DatabaseFactory.init(environment.config)
 
-    install(Koin) {
-        slf4jLogger()
-        modules(appModule())
-    }
+    val userRepo = PostgresUserRepository()
+    val accountRepo = PostgresAccountRepository()
+    val tradeRepo = PostgresTradeRepository()
+    val portfolioRepo = PostgresPortfolioRepository()
+
+    val executeTrade = ExecuteTrade(accountRepo, tradeRepo, portfolioRepo)
+    val getPortfolio = GetPortfolio(portfolioRepo, accountRepo)
 
     configureSerialization()
     configureStatusPages()
@@ -37,8 +37,9 @@ fun Application.module() {
     routing {
         healthRoutes("core-banking")
         route("/api") {
-            tradeRoutes()
-            portfolioRoutes()
+            userRoutes(userRepo, accountRepo)
+            tradeRoutes(executeTrade, tradeRepo)
+            portfolioRoutes(getPortfolio)
         }
     }
 

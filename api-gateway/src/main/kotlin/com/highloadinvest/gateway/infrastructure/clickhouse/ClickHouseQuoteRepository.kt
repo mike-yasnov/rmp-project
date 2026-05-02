@@ -4,117 +4,114 @@ import com.highloadinvest.gateway.domain.entities.Candle
 import com.highloadinvest.gateway.domain.entities.Quote
 import com.highloadinvest.gateway.domain.repositories.QuoteRepository
 import org.slf4j.LoggerFactory
-import java.sql.Connection
-import java.sql.DriverManager
+import java.net.HttpURLConnection
+import java.net.URI
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
-class ClickHouseQuoteRepository(private val jdbcUrl: String) : QuoteRepository {
+private val CH_TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
+
+class ClickHouseQuoteRepository(private val httpUrl: String) : QuoteRepository {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private fun connection(): Connection {
-        logger.debug("Opening ClickHouse connection to {}", jdbcUrl)
-        return DriverManager.getConnection(jdbcUrl)
+    private fun query(sql: String): String {
+        val url = URI("$httpUrl/?query=${java.net.URLEncoder.encode(sql, "UTF-8")}").toURL()
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "GET"
+        conn.connectTimeout = 5000
+        conn.readTimeout = 10000
+        val code = conn.responseCode
+        if (code != 200) {
+            val err = conn.errorStream?.bufferedReader()?.readText() ?: ""
+            throw RuntimeException("ClickHouse HTTP $code: $err")
+        }
+        return conn.inputStream.bufferedReader().readText()
     }
 
     override suspend fun getLatestQuotes(): List<Quote> {
         val start = System.currentTimeMillis()
-        logger.debug("getLatestQuotes() executing query")
-        val quotes = mutableListOf<Quote>()
-        connection().use { conn ->
-            conn.createStatement().use { stmt ->
-                val rs = stmt.executeQuery(
-                    """
-                    SELECT ticker, price, volume, timestamp
-                    FROM quotes
-                    ORDER BY timestamp DESC
-                    LIMIT 1 BY ticker
-                    """.trimIndent()
-                )
-                while (rs.next()) {
-                    quotes.add(
-                        Quote(
-                            ticker = rs.getString("ticker"),
-                            price = rs.getDouble("price"),
-                            volume = rs.getLong("volume"),
-                            timestamp = rs.getTimestamp("timestamp").toInstant()
-                        )
-                    )
-                }
-            }
-        }
-        val elapsed = System.currentTimeMillis() - start
-        logger.info("getLatestQuotes() returned {} quotes in {}ms", quotes.size, elapsed)
+        logger.debug("getLatestQuotes()")
+        val result = query("""
+            SELECT ticker, price, volume, timestamp
+            FROM quotes
+            ORDER BY timestamp DESC
+            LIMIT 1 BY ticker
+            FORMAT JSONEachRow
+        """.trimIndent())
+        val quotes = parseQuotes(result)
+        logger.info("getLatestQuotes() returned {} quotes in {}ms", quotes.size, System.currentTimeMillis() - start)
         return quotes
     }
 
     override suspend fun getQuoteByTicker(ticker: String): Quote? {
         val start = System.currentTimeMillis()
-        logger.debug("getQuoteByTicker() ticker={}", ticker)
-        var quote: Quote? = null
-        connection().use { conn ->
-            conn.prepareStatement(
-                "SELECT ticker, price, volume, timestamp FROM quotes WHERE ticker = ? ORDER BY timestamp DESC LIMIT 1"
-            ).use { stmt ->
-                stmt.setString(1, ticker)
-                val rs = stmt.executeQuery()
-                if (rs.next()) {
-                    quote = Quote(
-                        ticker = rs.getString("ticker"),
-                        price = rs.getDouble("price"),
-                        volume = rs.getLong("volume"),
-                        timestamp = rs.getTimestamp("timestamp").toInstant()
-                    )
-                }
-            }
-        }
-        val elapsed = System.currentTimeMillis() - start
-        logger.info("getQuoteByTicker({}) found={} in {}ms", ticker, quote != null, elapsed)
-        return quote
+        val result = query("SELECT ticker, price, volume, timestamp FROM quotes WHERE ticker='$ticker' ORDER BY timestamp DESC LIMIT 1 FORMAT JSONEachRow")
+        val quotes = parseQuotes(result)
+        logger.info("getQuoteByTicker({}) found={} in {}ms", ticker, quotes.isNotEmpty(), System.currentTimeMillis() - start)
+        return quotes.firstOrNull()
     }
 
     override suspend fun getCandles(ticker: String, from: Long, to: Long): List<Candle> {
         val start = System.currentTimeMillis()
-        logger.debug("getCandles() ticker={} from={} to={}", ticker, from, to)
-        val candles = mutableListOf<Candle>()
-        connection().use { conn ->
-            conn.prepareStatement(
-                """
-                SELECT
-                    ticker,
-                    toStartOfMinute(timestamp) as ts,
-                    argMin(price, timestamp) as open,
-                    max(price) as high,
-                    min(price) as low,
-                    argMax(price, timestamp) as close,
-                    sum(volume) as volume
-                FROM quotes
-                WHERE ticker = ? AND timestamp BETWEEN fromUnixTimestamp(?) AND fromUnixTimestamp(?)
-                GROUP BY ticker, ts
-                ORDER BY ts
-                """.trimIndent()
-            ).use { stmt ->
-                stmt.setString(1, ticker)
-                stmt.setLong(2, from)
-                stmt.setLong(3, to)
-                val rs = stmt.executeQuery()
-                while (rs.next()) {
-                    candles.add(
-                        Candle(
-                            ticker = rs.getString("ticker"),
-                            open = rs.getDouble("open"),
-                            high = rs.getDouble("high"),
-                            low = rs.getDouble("low"),
-                            close = rs.getDouble("close"),
-                            volume = rs.getLong("volume"),
-                            timestamp = rs.getTimestamp("ts").toInstant()
-                        )
-                    )
-                }
+        val result = query("""
+            SELECT
+                '$ticker' as ticker,
+                toStartOfMinute(timestamp) as ts,
+                argMin(price, timestamp) as open,
+                max(price) as high,
+                min(price) as low,
+                argMax(price, timestamp) as close,
+                sum(volume) as volume
+            FROM quotes
+            WHERE ticker='$ticker' AND timestamp BETWEEN fromUnixTimestamp($from) AND fromUnixTimestamp($to)
+            GROUP BY ts
+            ORDER BY ts
+            FORMAT JSONEachRow
+        """.trimIndent())
+        val candles = parseCandles(result)
+        logger.info("getCandles({}) returned {} in {}ms", ticker, candles.size, System.currentTimeMillis() - start)
+        return candles
+    }
+
+    private fun parseQuotes(jsonEachRow: String): List<Quote> {
+        if (jsonEachRow.isBlank()) return emptyList()
+        return jsonEachRow.trim().lines().mapNotNull { line ->
+            try {
+                val obj = org.json.JSONObject(line)
+                Quote(
+                    ticker = obj.getString("ticker"),
+                    price = obj.getDouble("price"),
+                    volume = obj.getLong("volume"),
+                    timestamp = LocalDateTime.parse(obj.getString("timestamp"), CH_TS).toInstant(ZoneOffset.UTC)
+                )
+            } catch (e: Exception) {
+                logger.warn("Failed to parse quote: {}", e.message)
+                null
             }
         }
-        val elapsed = System.currentTimeMillis() - start
-        logger.info("getCandles({}) returned {} candles in {}ms", ticker, candles.size, elapsed)
-        return candles
+    }
+
+    private fun parseCandles(jsonEachRow: String): List<Candle> {
+        if (jsonEachRow.isBlank()) return emptyList()
+        return jsonEachRow.trim().lines().mapNotNull { line ->
+            try {
+                val obj = org.json.JSONObject(line)
+                Candle(
+                    ticker = obj.getString("ticker"),
+                    open = obj.getDouble("open"),
+                    high = obj.getDouble("high"),
+                    low = obj.getDouble("low"),
+                    close = obj.getDouble("close"),
+                    volume = obj.getLong("volume"),
+                    timestamp = LocalDateTime.parse(obj.getString("ts"), CH_TS).toInstant(ZoneOffset.UTC)
+                )
+            } catch (e: Exception) {
+                logger.warn("Failed to parse candle: {}", e.message)
+                null
+            }
+        }
     }
 }

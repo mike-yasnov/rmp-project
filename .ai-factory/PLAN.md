@@ -142,7 +142,7 @@ Docker Compose для всей инфраструктуры (PostgreSQL, ClickHo
 
 ### Phase 4: Git
 
-- [ ] **Task 10: Инициализировать git-репозиторий и сделать первый коммит**
+- [x] **Task 10: Инициализировать git-репозиторий и сделать первый коммит**
   - `git init` в корне mobilki/
   - `.gitignore` для Kotlin/Gradle/IDE
   - Проверить что всё собирается: `./gradlew build` в обоих проектах

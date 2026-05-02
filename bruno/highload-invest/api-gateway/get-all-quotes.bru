@@ -1,0 +1,15 @@
+meta {
+  name: Get All Quotes
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{gateway_url}}/api/quotes
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}

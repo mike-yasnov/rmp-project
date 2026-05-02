@@ -1,0 +1,16 @@
+meta {
+  name: Get Portfolio
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{banking_url}}/api/portfolio/{{user_id}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.currency: eq RUB
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Health Check - Banking
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{banking_url}}/health
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+  res.body.service: eq core-banking
+}

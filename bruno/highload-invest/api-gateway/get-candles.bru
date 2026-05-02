@@ -1,0 +1,15 @@
+meta {
+  name: Get Candles
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{gateway_url}}/api/quotes/GAZP/candles?from=1712600000&to=1712700000
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}

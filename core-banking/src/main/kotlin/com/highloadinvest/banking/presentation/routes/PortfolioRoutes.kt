@@ -5,12 +5,9 @@ import com.highloadinvest.banking.presentation.dto.PortfolioResponse
 import com.highloadinvest.banking.presentation.dto.PositionResponse
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 import java.util.UUID
 
-fun Route.portfolioRoutes() {
-    val getPortfolio by inject<GetPortfolio>()
-
+fun Route.portfolioRoutes(getPortfolio: GetPortfolio) {
     route("/portfolio") {
         get("/{userId}") {
             val userId = UUID.fromString(call.parameters["userId"])

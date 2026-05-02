@@ -1,0 +1,16 @@
+meta {
+  name: Get Quote by Ticker
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{gateway_url}}/api/quotes/GAZP
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.ticker: eq GAZP
+}

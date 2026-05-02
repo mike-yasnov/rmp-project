@@ -1,0 +1,26 @@
+meta {
+  name: Create Trade (SELL)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{banking_url}}/api/trades
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": "{{user_id}}",
+    "ticker": "GAZP",
+    "action": "SELL",
+    "lots": 5,
+    "pricePerLot": 160.00
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.action: eq SELL
+}

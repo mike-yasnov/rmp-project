@@ -1,6 +1,6 @@
 val ktorVersion = "3.1.2"
 val kotlinVersion = "2.1.20"
-val koinVersion = "4.0.4"
+val koinVersion = "4.1.0-Beta5"
 val logbackVersion = "1.5.18"
 val clickhouseVersion = "0.7.2"
 val jedisVersion = "5.2.0"
@@ -33,16 +33,13 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-    // Koin DI
-    implementation("io.insert-koin:koin-ktor:$koinVersion")
-    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
+    // (Koin removed — manual DI to avoid Ktor 2.x classloading conflict)
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
-    // ClickHouse
-    implementation("com.clickhouse:clickhouse-jdbc:$clickhouseVersion")
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.4.4")
+    // ClickHouse (HTTP API)
+    implementation("org.json:json:20250107")
 
     // Redis
     implementation("redis.clients:jedis:$jedisVersion")
@@ -52,6 +49,16 @@ dependencies {
     testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("api-gateway-all.jar")
+    }
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    mergeServiceFiles()
 }
 
 tasks.withType<Test> {

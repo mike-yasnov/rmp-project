@@ -1,0 +1,31 @@
+meta {
+  name: Create User
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{banking_url}}/api/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "testuser",
+    "email": "test@highloadinvest.ru",
+    "initialBalance": 100000.0
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.username: eq testuser
+  res.body.balance: eq 100000
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("user_id", res.body.id);
+  }
+}

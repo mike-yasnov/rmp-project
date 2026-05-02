@@ -1,0 +1,17 @@
+meta {
+  name: Health Check - Gateway
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{gateway_url}}/health
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+  res.body.service: eq api-gateway
+}
