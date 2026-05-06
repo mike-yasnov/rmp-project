@@ -4,15 +4,26 @@ import com.highloadinvest.banking.application.usecases.ExecuteTrade
 import com.highloadinvest.banking.application.usecases.TradeExecutor
 import com.highloadinvest.banking.domain.entities.Trade
 import com.highloadinvest.banking.domain.entities.TradeAction
+import com.highloadinvest.banking.infrastructure.observability.BankingMetrics
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.SpanKind
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.api.trace.Tracer
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.UUID
 
-class PostgresTradeExecutor : TradeExecutor {
+class PostgresTradeExecutor(
+    openTelemetry: OpenTelemetry = OpenTelemetry.noop(),
+    private val metrics: BankingMetrics? = null
+) : TradeExecutor {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val tracer: Tracer = openTelemetry.getTracer("com.highloadinvest.banking.trade")
 
     override suspend fun execute(request: ExecuteTrade.Request): Trade {
         require(request.lots > 0) { "Lots must be positive" }
@@ -30,6 +41,22 @@ class PostgresTradeExecutor : TradeExecutor {
             createdAt = Instant.now()
         )
 
+        val span = tracer.spanBuilder("trade.execute")
+            .setSpanKind(SpanKind.INTERNAL)
+            .setAttribute("trade.id", trade.id.toString())
+            .setAttribute("trade.user_id", trade.userId.toString())
+            .setAttribute("trade.ticker", trade.ticker)
+            .setAttribute("trade.action", trade.action.name)
+            .setAttribute("trade.lots", trade.lots.toLong())
+            .setAttribute("trade.total_amount", trade.totalAmount)
+            .startSpan()
+
+        val attrs = Attributes.of(
+            AttributeKey.stringKey("action"), trade.action.name,
+            AttributeKey.stringKey("ticker"), trade.ticker
+        )
+        val start = System.currentTimeMillis()
+
         logger.info(
             "execute trade transaction userId={} ticker={} action={} lots={} total={}",
             trade.userId,
@@ -39,36 +66,47 @@ class PostgresTradeExecutor : TradeExecutor {
             trade.totalAmount
         )
 
-        DatabaseFactory.connection().use { conn ->
-            try {
-                conn.transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+        return span.makeCurrent().use { _ ->
+            DatabaseFactory.connection().use { conn ->
+                try {
+                    conn.transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
 
-                val balance = selectBalanceForUpdate(conn, trade.userId)
-                when (trade.action) {
-                    TradeAction.BUY -> {
-                        if (balance < totalAmount) {
-                            throw IllegalArgumentException("Insufficient funds: balance=$balance, required=$totalAmount")
+                    val balance = selectBalanceForUpdate(conn, trade.userId)
+                    when (trade.action) {
+                        TradeAction.BUY -> {
+                            if (balance < totalAmount) {
+                                throw IllegalArgumentException("Insufficient funds: balance=$balance, required=$totalAmount")
+                            }
+                            updateBalance(conn, trade.userId, balance - totalAmount)
+                            upsertBoughtPosition(conn, trade.userId, trade.ticker, trade.lots, trade.pricePerLot)
                         }
-                        updateBalance(conn, trade.userId, balance - totalAmount)
-                        upsertBoughtPosition(conn, trade.userId, trade.ticker, trade.lots, trade.pricePerLot)
+
+                        TradeAction.SELL -> {
+                            val currentLots = selectLotsForUpdate(conn, trade.userId, trade.ticker)
+                            if (currentLots < trade.lots) {
+                                throw IllegalArgumentException("Insufficient lots: have=$currentLots, required=${trade.lots}")
+                            }
+                            updateBalance(conn, trade.userId, balance + totalAmount)
+                            reducePosition(conn, trade.userId, trade.ticker, trade.lots)
+                        }
                     }
 
-                    TradeAction.SELL -> {
-                        val currentLots = selectLotsForUpdate(conn, trade.userId, trade.ticker)
-                        if (currentLots < trade.lots) {
-                            throw IllegalArgumentException("Insufficient lots: have=$currentLots, required=${trade.lots}")
-                        }
-                        updateBalance(conn, trade.userId, balance + totalAmount)
-                        reducePosition(conn, trade.userId, trade.ticker, trade.lots)
-                    }
+                    insertTrade(conn, trade)
+                    conn.commit()
+                    metrics?.tradesSuccess?.add(1, attrs)
+                    val elapsed = (System.currentTimeMillis() - start).toDouble()
+                    metrics?.tradeDuration?.record(elapsed, attrs)
+                    span.setStatus(StatusCode.OK)
+                    trade
+                } catch (e: Throwable) {
+                    conn.rollback()
+                    metrics?.tradesFailed?.add(1, attrs)
+                    span.recordException(e)
+                    span.setStatus(StatusCode.ERROR, e.message ?: "")
+                    throw e
+                } finally {
+                    span.end()
                 }
-
-                insertTrade(conn, trade)
-                conn.commit()
-                return trade
-            } catch (e: Throwable) {
-                conn.rollback()
-                throw e
             }
         }
     }

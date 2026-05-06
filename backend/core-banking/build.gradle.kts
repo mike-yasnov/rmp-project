@@ -4,6 +4,8 @@ val koinVersion = "4.1.0-Beta5"
 val logbackVersion = "1.5.18"
 val postgresVersion = "42.7.6"
 val hikariVersion = "6.3.0"
+val otelBomVersion = "1.46.0"
+val otelInstrumentationBomVersion = "2.11.0"
 
 plugins {
     kotlin("jvm") version "2.1.20"
@@ -23,6 +25,10 @@ repositories {
 }
 
 dependencies {
+    // OpenTelemetry BOMs
+    implementation(platform("io.opentelemetry:opentelemetry-bom:$otelBomVersion"))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:$otelInstrumentationBomVersion-alpha"))
+
     // Ktor Server
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -40,6 +46,17 @@ dependencies {
     // PostgreSQL
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
+
+    // OpenTelemetry
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry:opentelemetry-sdk-metrics")
+    implementation("io.opentelemetry:opentelemetry-sdk-trace")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.30.0-rc.1")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-ktor-3.0")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-jdbc")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0")
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")

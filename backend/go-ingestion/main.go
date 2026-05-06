@@ -17,6 +17,10 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Quote struct {
@@ -53,6 +57,9 @@ func main() {
 	batchSize := getenvInt("BATCH_SIZE", 100)
 	interval := time.Duration(getenvInt("INTERVAL_MS", 500)) * time.Millisecond
 
+	tel := initTelemetry(ctx, getenv("OTEL_SERVICE_NAME", "go-ingestion"))
+	defer tel.Shutdown(context.Background())
+
 	rdb := redis.NewClient(&redis.Options{Addr: redisAddr})
 	defer rdb.Close()
 
@@ -82,12 +89,13 @@ func main() {
 		select {
 		case q := <-quotes:
 			buffer = append(buffer, q)
-			publishQuote(ctx, rdb, q)
+			tel.QuotesIngested.Add(ctx, 1, metric.WithAttributes(tickerAttr(q.Ticker)))
+			publishQuote(ctx, rdb, q, tel)
 			if len(buffer) >= batchSize {
-				flush(clickhouseHTTP, &buffer)
+				flush(ctx, clickhouseHTTP, &buffer, tel)
 			}
 		case <-flushTicker.C:
-			flush(clickhouseHTTP, &buffer)
+			flush(ctx, clickhouseHTTP, &buffer, tel)
 		}
 	}
 }
@@ -155,15 +163,33 @@ func generateFallback(interval time.Duration, out chan<- Quote) {
 	}
 }
 
-func flush(clickhouseHTTP string, buffer *[]Quote) {
+func flush(ctx context.Context, clickhouseHTTP string, buffer *[]Quote, tel *Telemetry) {
 	if len(*buffer) == 0 {
 		return
 	}
 	rows := *buffer
+	rowCount := int64(len(rows))
+
+	ctx, span := tel.Tracer.Start(ctx, "clickhouse.insert_batch",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("db.system", "clickhouse"),
+			attribute.Int64("batch.size", rowCount),
+		),
+	)
+	defer span.End()
+
+	start := time.Now()
+	tel.BatchSize.Record(ctx, rowCount)
+
 	if err := insertClickHouse(clickhouseHTTP, rows); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		tel.InsertFailures.Add(ctx, 1)
 		log.Printf("clickhouse insert failed: %v", err)
 		return
 	}
+	tel.InsertDuration.Record(ctx, float64(time.Since(start).Milliseconds()))
 	log.Printf("inserted %d quotes", len(rows))
 	*buffer = (*buffer)[:0]
 }
@@ -191,15 +217,30 @@ func insertClickHouse(baseURL string, rows []Quote) error {
 	return nil
 }
 
-func publishQuote(ctx context.Context, rdb *redis.Client, q Quote) {
+func publishQuote(ctx context.Context, rdb *redis.Client, q Quote, tel *Telemetry) {
 	payload, err := json.Marshal(q)
 	if err != nil {
 		log.Printf("json marshal failed: %v", err)
 		return
 	}
+	ctx, span := tel.Tracer.Start(ctx, "redis.publish",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "redis"),
+			attribute.String("messaging.destination", "quotes:updates"),
+			attribute.String("ticker", q.Ticker),
+		),
+	)
+	defer span.End()
+
+	start := time.Now()
 	if err := rdb.Publish(ctx, "quotes:updates", payload).Err(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		log.Printf("redis publish failed: %v", err)
+		return
 	}
+	tel.PublishDuration.Record(ctx, float64(time.Since(start).Milliseconds()))
 }
 
 func getenv(key string, fallback string) string {

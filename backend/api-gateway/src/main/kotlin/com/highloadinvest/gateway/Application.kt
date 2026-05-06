@@ -2,6 +2,8 @@ package com.highloadinvest.gateway
 
 import com.highloadinvest.gateway.application.usecases.GetCurrentQuotes
 import com.highloadinvest.gateway.infrastructure.clickhouse.ClickHouseQuoteRepository
+import com.highloadinvest.gateway.infrastructure.observability.GatewayMetrics
+import com.highloadinvest.gateway.infrastructure.observability.Telemetry
 import com.highloadinvest.gateway.infrastructure.redis.RedisQuoteSubscriber
 import com.highloadinvest.gateway.presentation.plugins.*
 import com.highloadinvest.gateway.presentation.routes.healthRoutes
@@ -14,6 +16,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import io.opentelemetry.instrumentation.ktor.v3_0.KtorServerTelemetry
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -27,14 +30,17 @@ fun main(args: Array<String>) {
 fun Application.module() {
     logger.info("Configuring API Gateway module")
 
+    val openTelemetry = Telemetry.init()
+    val metrics = GatewayMetrics(openTelemetry)
+
     val clickhouseUrl = environment.config.property("clickhouse.url").getString()
     val redisHost = environment.config.property("redis.host").getString()
     val redisPort = environment.config.property("redis.port").getString().toInt()
     val bankingUrl = environment.config.property("banking.url").getString()
 
-    val quoteRepo = ClickHouseQuoteRepository(clickhouseUrl)
+    val quoteRepo = ClickHouseQuoteRepository(clickhouseUrl, openTelemetry, metrics)
     val getCurrentQuotes = GetCurrentQuotes(quoteRepo)
-    val wsHandler = QuoteWebSocketHandler()
+    val wsHandler = QuoteWebSocketHandler(metrics)
     val bankingClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
@@ -44,9 +50,14 @@ fun Application.module() {
         }
     }
 
-    val redisSubscriber = RedisQuoteSubscriber(redisHost, redisPort)
+    val redisSubscriber = RedisQuoteSubscriber(redisHost, redisPort, metrics)
     redisSubscriber.subscribe { message ->
         wsHandler.broadcast(message)
+    }
+
+    install(KtorServerTelemetry) {
+        setOpenTelemetry(openTelemetry)
+        capturedRequestHeaders("X-Request-Id", "User-Agent")
     }
 
     configureSerialization()

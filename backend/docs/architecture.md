@@ -328,57 +328,89 @@ api-gateway/
 - **Решение:** Прямые SQL-запросы через JDBC-драйвер (например, Exposed в SQL DSL режиме или чистый JDBC).
 - **Последствия:** Полный контроль над запросами и транзакциями, но больше boilerplate.
 
-### ADR-005: Koin для Dependency Injection
-- **Контекст:** Clean Architecture требует инверсии зависимостей. Ktor не имеет встроенного DI.
-- **Решение:** Koin — лёгковесный DI-фреймворк, идиоматичный для Kotlin, хорошо интегрируется с Ktor.
-- **Последствия:** Простая конфигурация, тестируемость через подмену реализаций.
+### ADR-005: Manual DI вместо Koin
+- **Контекст:** Изначально планировался Koin как DI-фреймворк. На практике в Ktor 3.x с фат-jar возникал конфликт классов между Ktor 2.x внутри Koin-Ktor и нашей Ktor 3.1.2.
+- **Решение:** Все зависимости создаются вручную в `Application.module()` и явно прокидываются вниз (репозитории → use cases → routes). Учебный проект, оверхед mappings оправдан простотой и отсутствием сторонних рантаймов.
+- **Последствия:** Меньше магии, проще читать; тестируемость остаётся (use cases принимают интерфейсы репозиториев).
+
+### ADR-006: OpenTelemetry с OTLP gRPC и self-hosted backend
+- **Контекст:** ТЗ требует OpenTelemetry (TR-006, FR-OBS-01/02). Нужна минимальная инфраструктура с трейсами и метриками для всех трёх языков (Kotlin, Go, Kotlin).
+- **Решение:**
+  - В каждый сервис подключается OTEL SDK (Kotlin: `opentelemetry-bom` + `opentelemetry-ktor-3.0`; Go: `go.opentelemetry.io/otel` + `otlptracegrpc`/`otlpmetricgrpc`).
+  - Экспорт в локальный `otel-collector` через OTLP gRPC (`:4317`).
+  - Collector маршрутизирует trace → Jaeger (OTLP), metrics → Prometheus (`/metrics` exporter на `:8889`).
+  - Grafana с auto-provisioned datasources поднимается для дашбордов.
+  - Trace propagation между сервисами — через стандартный W3C Trace Context (HTTP заголовок `traceparent`); ktor-инструментация автоматически принимает и передаёт.
+- **Последствия:** Stack полностью self-hosted, нулевая стоимость, полный контроль. В compose-файле появилось 4 контейнера (otel-collector, jaeger, prometheus, grafana).
 
 ## 8. Схема развёртывания
+
+Backend разворачивается на одном Linux-хосте (Ubuntu 24.04, `2.26.49.82`). Поверх Docker
+Compose поднимается инфраструктура (PostgreSQL, ClickHouse, Redis) и observability stack.
+Kotlin-сервисы могут запускаться:
+
+- **в Docker Compose** (`api-gateway`, `core-banking`, `go-ingestion` собираются из соответствующих
+  Dockerfile);
+- **через systemd** (для staging — fat-jar файлы в `/root/highload-invest/<service>/app.jar`,
+  units `api-gateway.service`, `core-banking.service` слушают `:8080`/`:8081` напрямую,
+  что упрощает локальный insmod kernel-module).
+
+Перед сервисами стоит nginx (системный) на `:80`, проксирующий `/api/*`, `/ws/*`, `/jaeger/`,
+`/grafana/` на нужные upstream-ы.
 
 ```plantuml
 @startuml
 !theme plain
 
-node "Docker Compose" {
+cloud "Internet" as net
 
-  node "api-gateway" as api {
-    [Ktor Application\nPort 8080]
+node "Linux host (2.26.49.82)" {
+
+  node "nginx :80" as nginx
+
+  package "Docker Compose stack" {
+    node "postgres :5432" as pg
+    node "clickhouse :8123/:9000" as ch
+    node "redis :6379" as redis
+
+    node "otel-collector\n:4317 / :4318 / :8889" as otel
+    node "jaeger :16686" as jaeger
+    node "prometheus :9090" as prom
+    node "grafana :3000" as grafana
+
+    node "go-ingestion" as ingest
   }
 
-  node "ingestion" as ingest {
-    [Go Service]
+  package "systemd services" {
+    node "api-gateway :8080" as api
+    node "core-banking :8081" as bank
   }
 
-  node "load-tester" as lt {
-    [Bot Simulator]
-  }
-
-  node "postgres" as pg {
-    database "PostgreSQL\nPort 5432"
-  }
-
-  node "clickhouse" as ch {
-    database "ClickHouse\nPort 8123 (HTTP)\nPort 9000 (Native)"
-  }
-
-  node "redis" as redis {
-    database "Redis\nPort 6379"
-  }
+  node "kernel module\n/dev/quotes" as driver
 }
 
-node "Host Linux" {
-  [Kernel Driver\n/dev/quotes] as driver
-}
+net --> nginx
 
-api -down-> pg
-api -down-> ch
-api -down-> redis
+nginx --> api : /api/quotes, /ws/*
+nginx --> bank : /api/users, /api/trades, /api/portfolio, /api/accounts
+nginx --> jaeger : /jaeger/
+nginx --> grafana : /grafana/
 
-ingest -down-> ch
-ingest -down-> redis
-ingest -left-> driver : mount /dev/quotes
+api --> ch
+api --> redis
+api --> bank : HTTP proxy
+api ..> otel : OTLP gRPC
+bank --> pg
+bank ..> otel : OTLP gRPC
 
-lt -up-> api
+ingest --> ch
+ingest --> redis
+ingest -left-> driver : read /dev/quotes
+ingest ..> otel : OTLP gRPC
+
+otel --> jaeger : traces (OTLP)
+otel ..> prom : /metrics scrape
+prom --> grafana : datasource
 
 @enduml
 ```
@@ -389,6 +421,63 @@ lt -up-> api
 |-----------|----------|---------------------|
 | NFR-001 Latency | < 1 сек от генерации до клиента | Redis PubSub + WebSocket push, батч < 100ms |
 | NFR-002 Throughput | 10K активных сессий | Горизонтальное масштабирование API Gateway, корутины Ktor |
-| NFR-003 Consistency | ACID для балансов | PostgreSQL транзакции, serializable isolation |
-| FR-OBS-01 Metrics | RPS, Error Rate, Latency | OpenTelemetry SDK → Collector → Grafana |
-| FR-OBS-02 Tracing | Сквозной трейсинг | OpenTelemetry trace context propagation |
+| NFR-003 Consistency | ACID для балансов | PostgreSQL транзакции, READ COMMITTED + `SELECT ... FOR UPDATE` |
+| FR-OBS-01 Metrics | RPS, Error Rate, Latency | OpenTelemetry SDK → Collector → Prometheus → Grafana |
+| FR-OBS-02 Tracing | Сквозной трейсинг | OpenTelemetry W3C Trace Context, Jaeger UI |
+
+## 10. Observability — детальный поток данных
+
+```plantuml
+@startuml
+!theme plain
+skinparam componentStyle rectangle
+
+package "Application services" {
+  [api-gateway\n(SDK)] as api
+  [core-banking\n(SDK)] as bank
+  [go-ingestion\n(SDK)] as ingest
+}
+
+package "Telemetry pipeline" {
+  [otel-collector\nOTLP receiver\nbatch processor] as col
+  database "Jaeger\n(traces)" as jaeger
+  database "Prometheus\n(metrics)" as prom
+}
+
+package "Dashboards / UI" {
+  [Jaeger UI :16686] as juI
+  [Grafana :3000] as graf
+}
+
+api  -down-> col : OTLP gRPC :4317\n(spans + metrics)
+bank -down-> col : OTLP gRPC :4317
+ingest -down-> col : OTLP gRPC :4317
+
+col --> jaeger : OTLP gRPC
+col --> prom : /metrics on :8889\n(scrape every 15s)
+
+jaeger -up-> juI
+prom --> graf : datasource
+
+@enduml
+```
+
+### Что инструментировано
+
+| Сервис | Spans (auto/manual) | Custom метрики |
+|--------|---------------------|----------------|
+| api-gateway | HTTP server (auto), `clickhouse.<op>` (manual), Jedis pubsub (через Redis JedisPubSub onMessage) | `ws.active_connections`, `ws.messages.broadcast`, `redis.pubsub.messages`, `clickhouse.query.duration`, `banking.proxy.duration` |
+| core-banking | HTTP server (auto), `trade.execute` (manual), `db.query.duration` (вокруг JDBC) | `trades.success`, `trades.failed`, `trade.execute.duration`, `users.created`, `db.query.duration` |
+| go-ingestion | `clickhouse.insert_batch`, `redis.publish` (manual) | `quotes.ingested`, `clickhouse.batch_size`, `clickhouse.insert.duration`, `redis.publish.duration`, `clickhouse.insert.failures` |
+
+### Trace propagation
+
+W3C Trace Context включён по умолчанию (`W3CTraceContextPropagator`). HTTP-запрос
+из api-gateway → core-banking несёт заголовок `traceparent`, серверная
+ktor-инструментация в core-banking подхватывает родительский context — в Jaeger
+обе span'ы оказываются в одной trace.
+
+Между go-ingestion и api-gateway propagation отсутствует (Redis pubsub
+не несёт OTEL контекст), поэтому трасса публикации и трасса WS-broadcast разделены.
+Это допустимо для учебного проекта; production-решение использовало бы
+`baggage` или Kafka headers.

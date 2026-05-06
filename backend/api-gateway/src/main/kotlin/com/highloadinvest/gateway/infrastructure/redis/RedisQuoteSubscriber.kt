@@ -1,11 +1,12 @@
 package com.highloadinvest.gateway.infrastructure.redis
 
+import com.highloadinvest.gateway.infrastructure.observability.GatewayMetrics
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.JedisPubSub
 
-class RedisQuoteSubscriber(host: String, port: Int) {
+class RedisQuoteSubscriber(host: String, port: Int, private val metrics: GatewayMetrics? = null) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val pool: JedisPool
@@ -26,6 +27,7 @@ class RedisQuoteSubscriber(host: String, port: Int) {
         subscriber = object : JedisPubSub() {
             override fun onMessage(channel: String, message: String) {
                 logger.debug("Received quote update: {} bytes", message.length)
+                metrics?.redisMessagesReceived?.add(1)
                 onMessage(message)
             }
 

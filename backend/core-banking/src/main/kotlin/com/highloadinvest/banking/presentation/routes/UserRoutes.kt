@@ -2,6 +2,7 @@ package com.highloadinvest.banking.presentation.routes
 
 import com.highloadinvest.banking.domain.repositories.AccountRepository
 import com.highloadinvest.banking.domain.repositories.UserRepository
+import com.highloadinvest.banking.infrastructure.observability.BankingMetrics
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -20,12 +21,17 @@ data class DepositRequest(val amount: Double)
 @Serializable
 data class AccountResponse(val userId: String, val balance: Double, val currency: String)
 
-fun Route.userRoutes(userRepository: UserRepository, accountRepository: AccountRepository) {
+fun Route.userRoutes(
+    userRepository: UserRepository,
+    accountRepository: AccountRepository,
+    metrics: BankingMetrics? = null
+) {
     route("/users") {
         post {
             val request = call.receive<CreateUserRequest>()
             val user = userRepository.create(request.username, request.email)
             val account = accountRepository.create(user.id, request.initialBalance)
+            metrics?.usersCreated?.add(1)
             call.respond(
                 HttpStatusCode.Created,
                 UserResponse(

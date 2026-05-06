@@ -3,6 +3,13 @@ package com.highloadinvest.gateway.infrastructure.clickhouse
 import com.highloadinvest.gateway.domain.entities.Candle
 import com.highloadinvest.gateway.domain.entities.Quote
 import com.highloadinvest.gateway.domain.repositories.QuoteRepository
+import com.highloadinvest.gateway.infrastructure.observability.GatewayMetrics
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.SpanKind
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.api.trace.Tracer
 import org.slf4j.LoggerFactory
 import java.net.HttpURLConnection
 import java.net.URI
@@ -13,9 +20,34 @@ import java.time.format.DateTimeFormatter
 
 private val CH_TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
 
-class ClickHouseQuoteRepository(private val httpUrl: String) : QuoteRepository {
+class ClickHouseQuoteRepository(
+    private val httpUrl: String,
+    openTelemetry: OpenTelemetry,
+    private val metrics: GatewayMetrics
+) : QuoteRepository {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val tracer: Tracer = openTelemetry.getTracer("com.highloadinvest.gateway.clickhouse")
+
+    private fun <T> traced(operation: String, sql: String, block: () -> T): T {
+        val span = tracer.spanBuilder("clickhouse.$operation")
+            .setSpanKind(SpanKind.CLIENT)
+            .setAttribute("db.system", "clickhouse")
+            .setAttribute("db.statement", sql.take(500))
+            .startSpan()
+        val start = System.currentTimeMillis()
+        return try {
+            span.makeCurrent().use { _ -> block() }
+        } catch (e: Exception) {
+            span.recordException(e)
+            span.setStatus(StatusCode.ERROR, e.message ?: "")
+            throw e
+        } finally {
+            val elapsed = (System.currentTimeMillis() - start).toDouble()
+            metrics.clickhouseQueryDuration.record(elapsed, Attributes.of(AttributeKey.stringKey("operation"), operation))
+            span.end()
+        }
+    }
 
     private fun query(sql: String): String {
         val url = URI("$httpUrl/?query=${java.net.URLEncoder.encode(sql, "UTF-8")}").toURL()
@@ -31,7 +63,7 @@ class ClickHouseQuoteRepository(private val httpUrl: String) : QuoteRepository {
         return conn.inputStream.bufferedReader().readText()
     }
 
-    override suspend fun getLatestQuotes(): List<Quote> {
+    override suspend fun getLatestQuotes(): List<Quote> = traced("getLatestQuotes", "SELECT ... FROM quotes LIMIT 1 BY ticker") {
         val start = System.currentTimeMillis()
         logger.debug("getLatestQuotes()")
         val result = query("""
@@ -43,18 +75,18 @@ class ClickHouseQuoteRepository(private val httpUrl: String) : QuoteRepository {
         """.trimIndent())
         val quotes = parseQuotes(result)
         logger.info("getLatestQuotes() returned {} quotes in {}ms", quotes.size, System.currentTimeMillis() - start)
-        return quotes
+        quotes
     }
 
-    override suspend fun getQuoteByTicker(ticker: String): Quote? {
+    override suspend fun getQuoteByTicker(ticker: String): Quote? = traced("getQuoteByTicker", "SELECT ... WHERE ticker=?") {
         val start = System.currentTimeMillis()
         val result = query("SELECT ticker, price, volume, timestamp FROM quotes WHERE ticker='$ticker' ORDER BY timestamp DESC LIMIT 1 FORMAT JSONEachRow")
         val quotes = parseQuotes(result)
         logger.info("getQuoteByTicker({}) found={} in {}ms", ticker, quotes.isNotEmpty(), System.currentTimeMillis() - start)
-        return quotes.firstOrNull()
+        quotes.firstOrNull()
     }
 
-    override suspend fun getCandles(ticker: String, from: Long, to: Long): List<Candle> {
+    override suspend fun getCandles(ticker: String, from: Long, to: Long): List<Candle> = traced("getCandles", "SELECT toStartOfMinute(...) GROUP BY ts") {
         val start = System.currentTimeMillis()
         val result = query("""
             SELECT
@@ -73,7 +105,7 @@ class ClickHouseQuoteRepository(private val httpUrl: String) : QuoteRepository {
         """.trimIndent())
         val candles = parseCandles(result)
         logger.info("getCandles({}) returned {} in {}ms", ticker, candles.size, System.currentTimeMillis() - start)
-        return candles
+        candles
     }
 
     private fun parseQuotes(jsonEachRow: String): List<Quote> {
