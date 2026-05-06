@@ -51,6 +51,41 @@ class PostgresAccountRepository : AccountRepository {
         logger.info("updateBalance userId={} completed in {}ms", userId, elapsed)
     }
 
+    override suspend fun deposit(userId: UUID, amount: Double): Account {
+        require(amount > 0) { "Deposit amount must be positive" }
+        logger.info("deposit userId={} amount={}", userId, amount)
+        DatabaseFactory.connection().use { conn ->
+            try {
+                conn.prepareStatement(
+                    """
+                    UPDATE accounts
+                    SET balance = balance + ?
+                    WHERE user_id = ?
+                    RETURNING id, user_id, balance, currency
+                    """.trimIndent()
+                ).use { stmt ->
+                    stmt.setDouble(1, amount)
+                    stmt.setObject(2, userId)
+                    val rs = stmt.executeQuery()
+                    if (!rs.next()) {
+                        throw NoSuchElementException("Account not found for user $userId")
+                    }
+                    val account = Account(
+                        id = rs.getObject("id", UUID::class.java),
+                        userId = rs.getObject("user_id", UUID::class.java),
+                        balance = rs.getDouble("balance"),
+                        currency = rs.getString("currency")
+                    )
+                    conn.commit()
+                    return account
+                }
+            } catch (e: Throwable) {
+                conn.rollback()
+                throw e
+            }
+        }
+    }
+
     override suspend fun create(userId: UUID, initialBalance: Double): Account {
         val id = UUID.randomUUID()
         logger.info("create account userId={} initialBalance={}", userId, initialBalance)

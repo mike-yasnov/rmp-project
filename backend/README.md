@@ -24,7 +24,8 @@
 |--------|------|-----------|
 | `api-gateway` | 8080 | REST + WebSocket для мобильных клиентов |
 | `core-banking` | 8081 | Балансы, сделки, портфели — PostgreSQL ACID |
-| `quote-generator` | — | Тестовый генератор котировок (пишет в ClickHouse + публикует в Redis) |
+| `go-ingestion` | — | Go ingestion: читает `/dev/quotes`, пишет в ClickHouse + публикует в Redis; без драйвера включает fallback-генератор |
+| `quote-generator` | — | Старый Kotlin-генератор котировок, доступен как compose profile `legacy-generator` |
 | `load-tester` | — | Имитатор N клиентов (для NFR-002 — 10K сессий) |
 | ClickHouse | 8123 / 9000 | Источник правды для котировок |
 | PostgreSQL | 5432 | Финансовые данные |
@@ -39,18 +40,13 @@
 # 1. Конфигурация
 cp .env.example .env
 
-# 2. Инфраструктура
-docker compose up -d
-
-# 3. Запуск Kotlin-сервисов (в разных терминалах)
-(cd api-gateway   && ./gradlew run)
-(cd core-banking  && ./gradlew run)
-
-# 4. (Опционально) Тестовый поток котировок
-(cd quote-generator && ./gradlew run)
+# 2. Вся серверная часть: БД, Redis, Ktor-сервисы, Go ingestion
+docker compose up -d --build
 ```
 
 Health: `curl http://localhost:8080/health` и `curl http://localhost:8081/health`.
+
+Если kernel module уже загружен на хосте и есть `/dev/quotes`, укажите `QUOTES_DEVICE=/dev/quotes` в `.env`. По умолчанию Go ingestion запускает fallback-генератор, чтобы стенд работал в Docker без прав на загрузку модуля ядра.
 
 ## Сборка fat-JAR
 
@@ -66,14 +62,39 @@ Health: `curl http://localhost:8080/health` и `curl http://localhost:8081/healt
 - `GET  /api/quotes` — все текущие котировки
 - `GET  /api/quotes/{ticker}` — по тикеру
 - `GET  /api/quotes/{ticker}/candles` — свечи
+- `POST /api/users` — прокси к Core Banking, регистрация пользователя
+- `GET  /api/users/{id}` — профиль пользователя
+- `POST /api/accounts/{userId}/deposit` — учебное пополнение счёта
+- `POST /api/trades` — покупка/продажа активов
+- `GET  /api/trades/{userId}` — история сделок
+- `GET  /api/portfolio/{userId}` — портфель
 - `WS   /ws/quotes` — подписка на realtime-обновления (Redis PubSub → broadcast)
 
 ### Core Banking (8081)
 - `POST /api/users` — создать пользователя
 - `GET  /api/users/{id}` — профиль
+- `POST /api/accounts/{userId}/deposit` — учебное пополнение счёта
 - `POST /api/trades` — исполнить сделку (валидация баланса, ACID)
-- `GET  /api/trades/{userId}` — история (планируется)
+- `GET  /api/trades/{userId}` — история
 - `GET  /api/portfolio/{userId}` — портфель + текущая стоимость
+
+Пример smoke-test:
+```bash
+USER_JSON=$(curl -fsS -X POST http://localhost:8080/api/users \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"demo","email":"demo@example.test","initialBalance":1000000}')
+USER_ID=$(printf '%s' "$USER_JSON" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+
+curl -fsS -X POST "http://localhost:8080/api/accounts/$USER_ID/deposit" \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":50000}'
+
+curl -fsS -X POST http://localhost:8080/api/trades \
+  -H 'Content-Type: application/json' \
+  -d "{\"userId\":\"$USER_ID\",\"ticker\":\"SBER\",\"action\":\"BUY\",\"lots\":2,\"pricePerLot\":250.0}"
+
+curl -fsS "http://localhost:8080/api/portfolio/$USER_ID"
+```
 
 API-сценарии для Bruno: [bruno/](bruno/).
 
@@ -111,7 +132,8 @@ ssh backend 'systemctl restart api-gateway core-banking'
 backend/
 ├── api-gateway/         Kotlin/Ktor (REST + WS)
 ├── core-banking/        Kotlin/Ktor (бизнес-логика)
-├── quote-generator/     Kotlin (тестовый поток котировок)
+├── go-ingestion/        Go (сбор котировок из /dev/quotes или fallback)
+├── quote-generator/     Kotlin (legacy тестовый поток котировок)
 ├── load-tester/         Kotlin (нагрузочный тестер)
 ├── clickhouse/          init.sql, users.xml
 ├── nginx/               highload-invest.conf

@@ -1,0 +1,8 @@
+build/
+*.mod*
+*.o
+*.cmd
+*.ko
+*.tmp
+*.symvers
+*.order

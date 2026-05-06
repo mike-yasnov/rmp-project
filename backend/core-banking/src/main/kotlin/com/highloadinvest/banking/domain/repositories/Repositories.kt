@@ -12,6 +12,7 @@ interface UserRepository {
 interface AccountRepository {
     suspend fun findByUserId(userId: UUID): Account?
     suspend fun updateBalance(userId: UUID, newBalance: Double)
+    suspend fun deposit(userId: UUID, amount: Double): Account
     suspend fun create(userId: UUID, initialBalance: Double): Account
 }
 

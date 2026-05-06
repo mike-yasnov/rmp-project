@@ -19,6 +19,10 @@ class ExecuteTradeTest {
         var balance = 10000.0
         override suspend fun findByUserId(userId: UUID) = Account(UUID.randomUUID(), userId, balance)
         override suspend fun updateBalance(userId: UUID, newBalance: Double) { balance = newBalance }
+        override suspend fun deposit(userId: UUID, amount: Double): Account {
+            balance += amount
+            return Account(UUID.randomUUID(), userId, balance)
+        }
         override suspend fun create(userId: UUID, initialBalance: Double) = Account(UUID.randomUUID(), userId, initialBalance)
     }
 

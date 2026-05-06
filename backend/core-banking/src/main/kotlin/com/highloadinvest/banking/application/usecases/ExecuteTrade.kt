@@ -9,11 +9,15 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.UUID
 
+interface TradeExecutor {
+    suspend fun execute(request: ExecuteTrade.Request): Trade
+}
+
 class ExecuteTrade(
     private val accountRepository: AccountRepository,
     private val tradeRepository: TradeRepository,
     private val portfolioRepository: PortfolioRepository
-) {
+) : TradeExecutor {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     data class Request(
@@ -24,7 +28,7 @@ class ExecuteTrade(
         val pricePerLot: Double
     )
 
-    suspend fun execute(request: Request): Trade {
+    override suspend fun execute(request: Request): Trade {
         logger.info("ExecuteTrade START userId={} ticker={} action={} lots={} price={}",
             request.userId, request.ticker, request.action, request.lots, request.pricePerLot)
 
