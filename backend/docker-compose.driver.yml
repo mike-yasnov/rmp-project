@@ -1,0 +1,36 @@
+services:
+  quote-driver:
+    build:
+      context: ..
+      dockerfile: backend/quote-driver/Dockerfile
+    container_name: highload-quote-driver
+    privileged: true
+    restart: unless-stopped
+    init: true
+    environment:
+      DRIVER_RING_SIZE: ${DRIVER_RING_SIZE:-64}
+      DRIVER_INTERVAL_MS: ${DRIVER_INTERVAL_MS:-500}
+      DRIVER_SMOKE_READ_LINES: ${DRIVER_SMOKE_READ_LINES:-5}
+      HOST_DEVICE_PATH: /host-dev/quotes
+    volumes:
+      - /lib/modules:/lib/modules:ro
+      - /usr/src:/usr/src:ro
+      - /dev:/host-dev
+      - ../module_for_generate_quotes:/driver
+    healthcheck:
+      test: ["CMD-SHELL", "test -r /host-dev/quotes && timeout 3 head -n 1 /host-dev/quotes >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  go-ingestion:
+    privileged: true
+    environment:
+      QUOTES_DEVICE: /host-dev/quotes
+      QUOTES_REQUIRE_DEVICE: "true"
+      QUOTES_DEVICE_WAIT_SEC: ${QUOTES_DEVICE_WAIT_SEC:-120}
+    volumes:
+      - /dev:/host-dev:ro
+    depends_on:
+      quote-driver:
+        condition: service_healthy

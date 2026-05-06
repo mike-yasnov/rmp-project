@@ -1,4 +1,19 @@
 services:
+  api-gateway:
+    depends_on:
+      otel-collector:
+        condition: service_started
+
+  core-banking:
+    depends_on:
+      otel-collector:
+        condition: service_started
+
+  go-ingestion:
+    depends_on:
+      otel-collector:
+        condition: service_started
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: highload-otel-collector
@@ -7,7 +22,10 @@ services:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
     volumes:
-      - ./otel-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./otel/otel-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    depends_on:
+      jaeger:
+        condition: service_started
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -26,7 +44,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./otel/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
   grafana:
     image: grafana/grafana:latest

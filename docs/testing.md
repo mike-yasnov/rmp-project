@@ -41,19 +41,68 @@ curl -fsS "http://localhost:8080/api/portfolio/$USER_ID"
 
 ## Нагрузочный тест
 
-Load tester имитирует клиентов, создаёт пользователей и случайно выполняет запросы котировок, портфеля и сделок.
+Load tester имитирует клиентов через API Gateway, создаёт пользователей, выполняет запросы котировок, портфеля и сделок. Для больших прогонов `BOT_COUNT` означает количество логических клиентов, а `ACTIVE_REQUESTS` ограничивает число одновременно активных REST-запросов.
 
 Короткая проверка:
 
 ```bash
-docker compose run --rm -e BOT_COUNT=5 -e DURATION_SEC=5 load-tester
+docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml run --rm \
+  -e BOT_COUNT=50 \
+  -e DURATION_SEC=10 \
+  -e CREATE_PARALLELISM=20 \
+  -e ACTIVE_REQUESTS=20 \
+  -e WS_PERCENT=20 \
+  load-tester
 ```
 
-Параметры для демонстрации:
+Проверка 10k логических клиентов:
 
 ```bash
-BOT_COUNT=10000 DURATION_SEC=300 docker compose --profile load up load-tester
+docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml run --rm \
+  -e BOT_COUNT=10000 \
+  -e DURATION_SEC=15 \
+  -e CREATE_PARALLELISM=100 \
+  -e ACTIVE_REQUESTS=50 \
+  -e WS_PERCENT=0 \
+  -e REQUEST_DELAY_MIN_MS=100 \
+  -e REQUEST_DELAY_MAX_MS=300 \
+  load-tester
 ```
+
+## Проверка kernel module через Docker Compose
+
+Driver-режим загружает Linux kernel module в ядро хоста, поэтому проверяется только на native Linux с установленными headers текущего ядра:
+
+```bash
+cd backend
+sudo apt install "linux-headers-$(uname -r)"
+docker compose -f docker-compose.yml -f docker-compose.driver.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.driver.yml ps
+head -5 /dev/quotes
+cat /proc/quotes_stat
+curl 'http://localhost:8123/?query=SELECT%20count()%20FROM%20quotes'
+```
+
+Ожидаемый результат: контейнер `highload-quote-driver` healthy, `/dev/quotes` отдаёт строки котировок, счётчик `total_written` в `/proc/quotes_stat` растёт, ClickHouse получает новые строки.
+
+## Проверка Observability
+
+Запуск:
+
+```bash
+cd backend
+docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml up -d --build
+```
+
+Проверки:
+
+```bash
+curl -fsS 'http://localhost:16686/api/services'
+curl -fsS 'http://localhost:9090/api/v1/query?query=quotes_received_total'
+curl -fsS 'http://localhost:9090/api/v1/query?query=quotes_inserted_total'
+```
+
+Ожидаемый результат: Jaeger показывает сервисы `api-gateway`, `core-banking`, `go-ingestion`; Prometheus видит метрики ingestion.
 
 ## Проверки React Native
 
@@ -89,9 +138,15 @@ docker run --rm -v "$PWD":/workspace -w /workspace \
 
 - `go test ./...` для `backend/go-ingestion`;
 - `docker compose config --quiet`;
+- `docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml config --quiet`;
 - `docker compose build` для `api-gateway`, `core-banking`, `go-ingestion`, `load-tester`;
 - `docker compose up -d` для backend;
 - smoke-сценарий регистрации, пополнения, покупки и портфеля;
-- короткий load-test с нулём ошибок;
+- проверка драйвера через compose: `/dev/quotes`, `/proc/quotes_stat`, рост ClickHouse и API `/api/quotes`;
+- WebSocket realtime-проверка: получение сообщений из `/ws/quotes`;
+- короткий load-test REST+WebSocket: 701 успешный запрос, 0 ошибок, 220 WebSocket сообщений;
+- load-test 10k логических клиентов REST: 3469 успешных запросов, 0 ошибок;
+- Observability: Jaeger services `go-ingestion`, `api-gateway`, `core-banking`; Prometheus метрики `quotes_received_total`, `quotes_inserted_total`;
 - `npm run typecheck` и `npm audit --omit=dev` для React Native.
 - `./gradlew :app:assembleDebug` для Native Android в Docker-образе `ghcr.io/cirruslabs/android-sdk:35`.
+- kernel module компилировался как `quotes_driver.ko`; runtime-загрузка проверяется командой compose override выше.
