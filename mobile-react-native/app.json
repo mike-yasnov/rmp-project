@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "HighLoad Invest RN",
+    "slug": "highload-invest-rn",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "platforms": ["android"],
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.highloadinvest.reactnative",
+      "usesCleartextTraffic": true
+    },
+    "extra": {
+      "apiBaseUrl": "http://10.0.2.2:8080"
+    }
+  }
+}

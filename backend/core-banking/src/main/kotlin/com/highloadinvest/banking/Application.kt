@@ -1,6 +1,5 @@
 package com.highloadinvest.banking
 
-import com.highloadinvest.banking.application.usecases.ExecuteTrade
 import com.highloadinvest.banking.application.usecases.GetPortfolio
 import com.highloadinvest.banking.infrastructure.postgres.*
 import com.highloadinvest.banking.presentation.plugins.*
@@ -26,7 +25,7 @@ fun Application.module() {
     val tradeRepo = PostgresTradeRepository()
     val portfolioRepo = PostgresPortfolioRepository()
 
-    val executeTrade = ExecuteTrade(accountRepo, tradeRepo, portfolioRepo)
+    val executeTrade = PostgresTradeExecutor()
     val getPortfolio = GetPortfolio(portfolioRepo, accountRepo)
 
     configureSerialization()

@@ -1,6 +1,7 @@
 package com.highloadinvest.banking.presentation.routes
 
 import com.highloadinvest.banking.application.usecases.ExecuteTrade
+import com.highloadinvest.banking.application.usecases.TradeExecutor
 import com.highloadinvest.banking.domain.entities.TradeAction
 import com.highloadinvest.banking.domain.repositories.TradeRepository
 import com.highloadinvest.banking.presentation.dto.TradeRequest
@@ -10,7 +11,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.UUID
 
-fun Route.tradeRoutes(executeTrade: ExecuteTrade, tradeRepository: TradeRepository) {
+fun Route.tradeRoutes(executeTrade: TradeExecutor, tradeRepository: TradeRepository) {
     route("/trades") {
         get("/{userId}") {
             val userId = UUID.fromString(call.parameters["userId"])

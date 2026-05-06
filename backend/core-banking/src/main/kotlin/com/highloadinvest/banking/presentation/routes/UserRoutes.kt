@@ -14,6 +14,12 @@ data class CreateUserRequest(val username: String, val email: String, val initia
 @Serializable
 data class UserResponse(val id: String, val username: String, val email: String, val balance: Double)
 
+@Serializable
+data class DepositRequest(val amount: Double)
+
+@Serializable
+data class AccountResponse(val userId: String, val balance: Double, val currency: String)
+
 fun Route.userRoutes(userRepository: UserRepository, accountRepository: AccountRepository) {
     route("/users") {
         post {
@@ -27,6 +33,35 @@ fun Route.userRoutes(userRepository: UserRepository, accountRepository: AccountR
                     username = user.username,
                     email = user.email,
                     balance = account.balance
+                )
+            )
+        }
+
+        get("/{id}") {
+            val id = java.util.UUID.fromString(call.parameters["id"])
+            val user = userRepository.findById(id) ?: throw NoSuchElementException("User not found: $id")
+            val account = accountRepository.findByUserId(id) ?: throw NoSuchElementException("Account not found: $id")
+            call.respond(
+                UserResponse(
+                    id = user.id.toString(),
+                    username = user.username,
+                    email = user.email,
+                    balance = account.balance
+                )
+            )
+        }
+    }
+
+    route("/accounts") {
+        post("/{userId}/deposit") {
+            val userId = java.util.UUID.fromString(call.parameters["userId"])
+            val request = call.receive<DepositRequest>()
+            val account = accountRepository.deposit(userId, request.amount)
+            call.respond(
+                AccountResponse(
+                    userId = account.userId.toString(),
+                    balance = account.balance,
+                    currency = account.currency
                 )
             )
         }

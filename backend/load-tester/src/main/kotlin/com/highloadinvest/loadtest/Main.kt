@@ -142,5 +142,6 @@ fun main() = runBlocking {
     logger.info("Successful: {}", total)
     logger.info("Errors: {}", errors)
     logger.info("Avg latency: {}ms", avgMs)
-    logger.info("Error rate: {:.2f}%", if (total + errors > 0) errors.toDouble() / (total + errors) * 100 else 0.0)
+    val errorRate = if (total + errors > 0) errors.toDouble() / (total + errors) * 100 else 0.0
+    logger.info("Error rate: {}%", "%.2f".format(errorRate))
 }

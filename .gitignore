@@ -13,6 +13,18 @@ Thumbs.db
 .env
 *.local
 
+# Build outputs
+build/
+.gradle/
+**/build/
+
+# JavaScript / React Native
+node_modules/
+.expo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # AI tooling artefacts
 .ai-factory/
 .claude/
