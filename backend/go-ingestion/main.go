@@ -17,10 +17,15 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
 type Quote struct {
@@ -49,32 +54,51 @@ var fallbackTickers = []TickerState{
 	{"PLZL", 12500.00, 0.020},
 }
 
+var (
+	tracer                oteltrace.Tracer = otel.Tracer("go-ingestion")
+	quotesReceivedMetric  metric.Int64Counter
+	quotesInsertedMetric  metric.Int64Counter
+	redisPublishedMetric  metric.Int64Counter
+	clickhouseErrorMetric metric.Int64Counter
+)
+
 func main() {
 	ctx := context.Background()
 	devicePath := getenv("QUOTES_DEVICE", "/dev/quotes")
 	clickhouseHTTP := getenv("CLICKHOUSE_HTTP", "http://localhost:8123")
 	redisAddr := getenv("REDIS_ADDR", "localhost:6379")
+	serviceName := getenv("OTEL_SERVICE_NAME", "go-ingestion")
+	otelEndpoint := getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 	batchSize := getenvInt("BATCH_SIZE", 100)
 	interval := time.Duration(getenvInt("INTERVAL_MS", 500)) * time.Millisecond
+	requireDevice := getenvBool("QUOTES_REQUIRE_DEVICE", false)
+	deviceWait := time.Duration(getenvInt("QUOTES_DEVICE_WAIT_SEC", 0)) * time.Second
 
-	tel := initTelemetry(ctx, getenv("OTEL_SERVICE_NAME", "go-ingestion"))
-	defer tel.Shutdown(context.Background())
+	shutdownTelemetry := initTelemetry(ctx, serviceName, otelEndpoint)
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := shutdownTelemetry(shutdownCtx); err != nil {
+			log.Printf("otel shutdown failed: %v", err)
+		}
+	}()
 
 	rdb := redis.NewClient(&redis.Options{Addr: redisAddr})
 	defer rdb.Close()
 
-	log.Printf("go-ingestion: clickhouse=%s redis=%s device=%s batch=%d interval=%s", clickhouseHTTP, redisAddr, devicePath, batchSize, interval)
+	log.Printf("go-ingestion: clickhouse=%s redis=%s device=%s batch=%d interval=%s requireDevice=%t", clickhouseHTTP, redisAddr, devicePath, batchSize, interval, requireDevice)
 
 	quotes := make(chan Quote, batchSize*4)
 	if devicePath != "" && devicePath != "/dev/null" {
-		file, err := os.Open(devicePath)
-		if err != nil {
+		if err := waitForDevice(devicePath, deviceWait); err != nil {
+			if requireDevice {
+				log.Fatalf("device %s is required but not available: %v", devicePath, err)
+			}
 			log.Printf("device %s is not available (%v), using fallback generator", devicePath, err)
 			go generateFallback(interval, quotes)
 		} else {
-			defer file.Close()
 			log.Printf("reading quotes from %s", devicePath)
-			go readDevice(file, interval, quotes)
+			go readDevice(devicePath, interval, quotes, !requireDevice)
 		}
 	} else {
 		log.Printf("quotes device is disabled, using fallback generator")
@@ -89,32 +113,180 @@ func main() {
 		select {
 		case q := <-quotes:
 			buffer = append(buffer, q)
-			tel.QuotesIngested.Add(ctx, 1, metric.WithAttributes(tickerAttr(q.Ticker)))
-			publishQuote(ctx, rdb, q, tel)
+			quotesReceivedMetric.Add(ctx, 1, metric.WithAttributes(attribute.String("ticker", q.Ticker)))
+			publishQuote(ctx, rdb, q)
 			if len(buffer) >= batchSize {
-				flush(ctx, clickhouseHTTP, &buffer, tel)
+				flush(ctx, clickhouseHTTP, &buffer)
 			}
 		case <-flushTicker.C:
-			flush(ctx, clickhouseHTTP, &buffer, tel)
+			flush(ctx, clickhouseHTTP, &buffer)
 		}
 	}
 }
 
-func readDevice(reader io.Reader, fallbackInterval time.Duration, out chan<- Quote) {
-	scanner := bufio.NewScanner(reader)
-	readRows := 0
-	for scanner.Scan() {
-		if q, ok := parseDriverLine(scanner.Text()); ok {
-			readRows++
+func initTelemetry(ctx context.Context, serviceName string, endpoint string) func(context.Context) error {
+	meter := otel.Meter("go-ingestion")
+	quotesReceivedMetric, _ = meter.Int64Counter("quotes_received_total")
+	quotesInsertedMetric, _ = meter.Int64Counter("quotes_inserted_total")
+	redisPublishedMetric, _ = meter.Int64Counter("redis_quotes_published_total")
+	clickhouseErrorMetric, _ = meter.Int64Counter("clickhouse_insert_errors_total")
+
+	if strings.TrimSpace(endpoint) == "" {
+		log.Printf("otel disabled: OTEL_EXPORTER_OTLP_ENDPOINT is empty")
+		return func(context.Context) error { return nil }
+	}
+
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			attribute.String("service.name", serviceName),
+			attribute.String("service.version", "0.1.0"),
+		),
+	)
+	if err != nil {
+		log.Printf("otel resource init failed: %v", err)
+		return func(context.Context) error { return nil }
+	}
+
+	baseURL := strings.TrimRight(endpoint, "/")
+	traceExporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(baseURL+"/v1/traces"))
+	if err != nil {
+		log.Printf("otel trace exporter init failed: %v", err)
+		return func(context.Context) error { return nil }
+	}
+	metricExporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithEndpointURL(baseURL+"/v1/metrics"))
+	if err != nil {
+		log.Printf("otel metric exporter init failed: %v", err)
+		return func(context.Context) error { return traceExporter.Shutdown(context.Background()) }
+	}
+
+	traceProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(traceExporter),
+		sdktrace.WithResource(res),
+	)
+	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter, sdkmetric.WithInterval(10*time.Second))),
+		sdkmetric.WithResource(res),
+	)
+
+	otel.SetTracerProvider(traceProvider)
+	otel.SetMeterProvider(meterProvider)
+	tracer = otel.Tracer("go-ingestion")
+	meter = otel.Meter("go-ingestion")
+	quotesReceivedMetric, _ = meter.Int64Counter("quotes_received_total")
+	quotesInsertedMetric, _ = meter.Int64Counter("quotes_inserted_total")
+	redisPublishedMetric, _ = meter.Int64Counter("redis_quotes_published_total")
+	clickhouseErrorMetric, _ = meter.Int64Counter("clickhouse_insert_errors_total")
+
+	log.Printf("otel enabled: service=%s endpoint=%s", serviceName, endpoint)
+	return func(ctx context.Context) error {
+		err1 := traceProvider.Shutdown(ctx)
+		err2 := meterProvider.Shutdown(ctx)
+		if err1 != nil {
+			return err1
+		}
+		return err2
+	}
+}
+
+func waitForDevice(path string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for {
+		file, err := os.Open(path)
+		if err == nil {
+			return file.Close()
+		}
+		if timeout <= 0 || time.Now().After(deadline) {
+			return err
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
+func readDevice(path string, interval time.Duration, out chan<- Quote, allowFallback bool) {
+	seen := make(map[string]time.Time)
+	emptyReads := 0
+
+	for {
+		lines, err := readDeviceSnapshot(path)
+		if err != nil {
+			if allowFallback {
+				log.Printf("device read failed (%v), using fallback generator", err)
+				generateFallback(interval, out)
+				return
+			}
+			log.Fatalf("device read failed: %v", err)
+		}
+
+		emitted := 0
+		for _, line := range lines {
+			q, ok := parseDriverLine(line)
+			if !ok {
+				continue
+			}
+			key := q.Ticker + "|" + q.Timestamp
+			if _, exists := seen[key]; exists {
+				continue
+			}
+			seen[key] = time.Now()
 			out <- q
+			emitted++
+		}
+
+		if emitted == 0 {
+			emptyReads++
+			if allowFallback && emptyReads >= 3 {
+				log.Printf("device produced no quotes, using fallback generator")
+				generateFallback(interval, out)
+				return
+			}
+			if !allowFallback && emptyReads >= 3 {
+				log.Fatalf("device produced no quotes")
+			}
+		} else {
+			emptyReads = 0
+			pruneSeen(seen, 5*time.Minute)
+		}
+
+		time.Sleep(interval)
+	}
+}
+
+func readDeviceSnapshot(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	buffer := make([]byte, 32*1024)
+	n, err := file.Read(buffer)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	if n == 0 {
+		return nil, nil
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(buffer[:n]))
+	lines := make([]string, 0, 32)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
+}
+
+func pruneSeen(seen map[string]time.Time, maxAge time.Duration) {
+	if len(seen) < 10000 {
+		return
+	}
+	cutoff := time.Now().Add(-maxAge)
+	for key, observedAt := range seen {
+		if observedAt.Before(cutoff) {
+			delete(seen, key)
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		log.Printf("device read failed: %v", err)
-	}
-	if readRows == 0 {
-		log.Printf("device produced no quotes, switching to fallback generator")
-		generateFallback(fallbackInterval, out)
+	if len(seen) >= 10000 {
+		clear(seen)
 	}
 }
 
@@ -163,38 +335,25 @@ func generateFallback(interval time.Duration, out chan<- Quote) {
 	}
 }
 
-func flush(ctx context.Context, clickhouseHTTP string, buffer *[]Quote, tel *Telemetry) {
+func flush(ctx context.Context, clickhouseHTTP string, buffer *[]Quote) {
 	if len(*buffer) == 0 {
 		return
 	}
 	rows := *buffer
-	rowCount := int64(len(rows))
-
-	ctx, span := tel.Tracer.Start(ctx, "clickhouse.insert_batch",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(
-			attribute.String("db.system", "clickhouse"),
-			attribute.Int64("batch.size", rowCount),
-		),
-	)
-	defer span.End()
-
-	start := time.Now()
-	tel.BatchSize.Record(ctx, rowCount)
-
-	if err := insertClickHouse(clickhouseHTTP, rows); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		tel.InsertFailures.Add(ctx, 1)
+	if err := insertClickHouse(ctx, clickhouseHTTP, rows); err != nil {
+		clickhouseErrorMetric.Add(ctx, 1)
 		log.Printf("clickhouse insert failed: %v", err)
 		return
 	}
-	tel.InsertDuration.Record(ctx, float64(time.Since(start).Milliseconds()))
+	quotesInsertedMetric.Add(ctx, int64(len(rows)))
 	log.Printf("inserted %d quotes", len(rows))
 	*buffer = (*buffer)[:0]
 }
 
-func insertClickHouse(baseURL string, rows []Quote) error {
+func insertClickHouse(ctx context.Context, baseURL string, rows []Quote) error {
+	ctx, span := tracer.Start(ctx, "clickhouse.insert_quotes", oteltrace.WithAttributes(attribute.Int("rows", len(rows))))
+	defer span.End()
+
 	var body bytes.Buffer
 	for _, q := range rows {
 		ts, err := time.Parse(time.RFC3339Nano, q.Timestamp)
@@ -205,42 +364,38 @@ func insertClickHouse(baseURL string, rows []Quote) error {
 	}
 
 	url := strings.TrimRight(baseURL, "/") + "/?query=INSERT%20INTO%20quotes%20(ticker%2Cprice%2Cvolume%2Ctimestamp)%20FORMAT%20TabSeparated"
-	resp, err := http.Post(url, "text/tab-separated-values", &body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &body)
 	if err != nil {
+		span.RecordError(err)
+		return err
+	}
+	req.Header.Set("Content-Type", "text/tab-separated-values")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		span.RecordError(err)
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode/100 != 2 {
 		msg, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("http %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
+		err := fmt.Errorf("http %d: %s", resp.StatusCode, strings.TrimSpace(string(msg)))
+		span.RecordError(err)
+		return err
 	}
 	return nil
 }
 
-func publishQuote(ctx context.Context, rdb *redis.Client, q Quote, tel *Telemetry) {
+func publishQuote(ctx context.Context, rdb *redis.Client, q Quote) {
 	payload, err := json.Marshal(q)
 	if err != nil {
 		log.Printf("json marshal failed: %v", err)
 		return
 	}
-	ctx, span := tel.Tracer.Start(ctx, "redis.publish",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(
-			attribute.String("messaging.system", "redis"),
-			attribute.String("messaging.destination", "quotes:updates"),
-			attribute.String("ticker", q.Ticker),
-		),
-	)
-	defer span.End()
-
-	start := time.Now()
 	if err := rdb.Publish(ctx, "quotes:updates", payload).Err(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
 		log.Printf("redis publish failed: %v", err)
 		return
 	}
-	tel.PublishDuration.Record(ctx, float64(time.Since(start).Milliseconds()))
+	redisPublishedMetric.Add(ctx, 1, metric.WithAttributes(attribute.String("ticker", q.Ticker)))
 }
 
 func getenv(key string, fallback string) string {
@@ -260,6 +415,14 @@ func getenvInt(key string, fallback int) int {
 		return fallback
 	}
 	return parsed
+}
+
+func getenvBool(key string, fallback bool) bool {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
+	if value == "" {
+		return fallback
+	}
+	return value == "1" || value == "true" || value == "yes" || value == "on"
 }
 
 func round2(value float64) float64 {

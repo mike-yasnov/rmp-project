@@ -69,6 +69,7 @@ services:
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_MAX_POOL_SIZE: ${DATABASE_MAX_POOL_SIZE:-20}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Kotlin OTEL SDK uses gRPC exporter (port 4317).
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_SERVICE_NAME: core-banking
@@ -128,10 +129,12 @@ services:
       CLICKHOUSE_HTTP: http://clickhouse:8123
       REDIS_ADDR: redis:6379
       QUOTES_DEVICE: /dev/quotes
+      QUOTES_REQUIRE_DEVICE: ${QUOTES_REQUIRE_DEVICE:-false}
+      QUOTES_DEVICE_WAIT_SEC: ${QUOTES_DEVICE_WAIT_SEC:-0}
       BATCH_SIZE: ${INGESTION_BATCH_SIZE:-100}
       INTERVAL_MS: ${INGESTION_INTERVAL_MS:-500}
-      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
-      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      # Go OTEL exporter (otlptracehttp) — uses OTLP HTTP on port 4318.
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_SERVICE_NAME: go-ingestion
       OTEL_RESOURCE_ATTRIBUTES: service.namespace=highload-invest,deployment.environment=${OTEL_ENV:-local}
     devices:
@@ -174,6 +177,11 @@ services:
       BANKING_URL: http://core-banking:8081
       BOT_COUNT: ${BOT_COUNT:-100}
       DURATION_SEC: ${DURATION_SEC:-60}
+      CREATE_PARALLELISM: ${CREATE_PARALLELISM:-100}
+      ACTIVE_REQUESTS: ${ACTIVE_REQUESTS:-50}
+      WS_PERCENT: ${WS_PERCENT:-10}
+      REQUEST_DELAY_MIN_MS: ${REQUEST_DELAY_MIN_MS:-50}
+      REQUEST_DELAY_MAX_MS: ${REQUEST_DELAY_MAX_MS:-500}
     depends_on:
       api-gateway:
         condition: service_healthy
