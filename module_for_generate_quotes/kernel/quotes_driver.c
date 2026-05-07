@@ -34,13 +34,19 @@ MODULE_VERSION("1.0");
 
 /* ─── Параметры модуля ─────────────────────────────────────────────── */
 
-static int ring_size   = 64;
-static int interval_ms = 500;
+static int ring_size    = 64;
+static int interval_ms  = 500;
+static int volatility_bp = 100;
+static int reversion_div = 32;
 
-module_param(ring_size,   int, 0444);
-module_param(interval_ms, int, 0644);
-MODULE_PARM_DESC(ring_size,   "Ring buffer size (default 64)");
-MODULE_PARM_DESC(interval_ms, "Quote generation interval ms (default 500)");
+module_param(ring_size,    int, 0444);
+module_param(interval_ms,  int, 0644);
+module_param(volatility_bp, int, 0644);
+module_param(reversion_div, int, 0644);
+MODULE_PARM_DESC(ring_size,    "Ring buffer size (default 64)");
+MODULE_PARM_DESC(interval_ms,  "Quote generation interval ms (default 500)");
+MODULE_PARM_DESC(volatility_bp, "Per-tick max price delta in basis points (default 100 = 1%)");
+MODULE_PARM_DESC(reversion_div, "Mean-reversion strength: pull = (base - price) / reversion_div per tick. 0 disables (default 32 ≈ 3%)");
 
 /* ─── Кольцевой буфер ──────────────────────────────────────────────── */
 
@@ -124,24 +130,52 @@ static const char *symbols[] = {
 static const u32 base_prices[] = {185,140,415,178,248,875,510,630,32,168};
 #define NUM_SYMBOLS ARRAY_SIZE(symbols)
 
+/* Текущая цена каждого тикера в "центах" (1/100 от unit). Обновляется
+ * только из generator-потока, поэтому без локов. */
+static u64  prices_cents[NUM_SYMBOLS];
+static bool prices_initialized;
+
 static struct quote generate_quote(void)
 {
     struct quote q;
     u32 rnd, idx;
-    s32 delta_bp;
+    s32 delta_bp, range;
+    s64 delta_cents, reversion_cents, new_cents;
+
+    if (!prices_initialized) {
+        int i;
+        for (i = 0; i < NUM_SYMBOLS; i++)
+            prices_cents[i] = (u64)base_prices[i] * 100;
+        prices_initialized = true;
+    }
 
     get_random_bytes(&rnd, sizeof(rnd));
     idx = rnd % NUM_SYMBOLS;
     strscpy(q.symbol, symbols[idx], sizeof(q.symbol));
 
+    /* Случайная дельта от ТЕКУЩЕЙ цены — random walk, не bounded random. */
+    range = (volatility_bp > 0) ? (2 * volatility_bp + 1) : 1;
     get_random_bytes(&rnd, sizeof(rnd));
-    delta_bp     = (s32)(rnd % 400) - 200;
-    q.price_int  = base_prices[idx] +
-                   (u32)((s64)base_prices[idx] * delta_bp / 10000);
-    get_random_bytes(&rnd, sizeof(rnd));
-    q.price_frac  = rnd % 100;
-    q.change_bp   = delta_bp;
-    q.timestamp   = ktime_get_real_ns();
+    delta_bp    = (s32)(rnd % (u32)range) - volatility_bp;
+    delta_cents = (s64)prices_cents[idx] * delta_bp / 10000;
+
+    /* Soft mean-reversion к base — иначе за часы цена уезжает экспоненциально. */
+    if (reversion_div > 0) {
+        s64 base = (s64)base_prices[idx] * 100;
+        reversion_cents = (base - (s64)prices_cents[idx]) / reversion_div;
+    } else {
+        reversion_cents = 0;
+    }
+
+    new_cents = (s64)prices_cents[idx] + delta_cents + reversion_cents;
+    if (new_cents < 1)
+        new_cents = 1;
+    prices_cents[idx] = (u64)new_cents;
+
+    q.price_int  = (u32)(prices_cents[idx] / 100);
+    q.price_frac = (u32)(prices_cents[idx] % 100);
+    q.change_bp  = delta_bp;
+    q.timestamp  = ktime_get_real_ns();
     return q;
 }
 
