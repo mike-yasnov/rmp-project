@@ -282,9 +282,14 @@ table {
   width: 100%;
   margin: 4mm 0 6mm 0;
   border-collapse: collapse;
-  page-break-inside: avoid;
+  page-break-inside: auto;
   font-size: 12pt;
   line-height: 1.25;
+}
+
+tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 thead,
@@ -302,6 +307,14 @@ td {
 
 th {
   font-weight: 700;
+  text-align: center;
+}
+
+th:first-child,
+td:first-child {
+  width: 18mm;
+  min-width: 18mm;
+  white-space: nowrap;
   text-align: center;
 }
 

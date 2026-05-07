@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HighLoad Invest Ecosystem — презентация проекта</title>
+  <style>
+    @page {
+      size: 297mm 167.0625mm;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #101820;
+      color: #101820;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.32;
+    }
+
+    body {
+      counter-reset: slide;
+    }
+
+    .slide {
+      position: relative;
+      width: 297mm;
+      height: 167.0625mm;
+      overflow: hidden;
+      break-after: page;
+      page-break-after: always;
+      background: #f6f7f4;
+      padding: 16mm 18mm 13mm;
+      display: flex;
+      flex-direction: column;
+      gap: 9mm;
+      counter-increment: slide;
+    }
+
+    .slide::after {
+      content: counter(slide, decimal-leading-zero);
+      position: absolute;
+      right: 13mm;
+      bottom: 8mm;
+      color: #6e756f;
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .slide.dark {
+      background: #101820;
+      color: #f6f7f4;
+    }
+
+    .slide.split {
+      display: grid;
+      grid-template-columns: 1fr 1.18fr;
+      gap: 14mm;
+      align-items: center;
+    }
+
+    .slide.visual {
+      padding: 12mm 14mm 11mm;
+    }
+
+    .kicker {
+      margin: 0 0 4mm;
+      color: #2c7a5b;
+      font-size: 12pt;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .dark .kicker {
+      color: #74d7a7;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 235mm;
+      font-size: 42pt;
+      line-height: 1.03;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: 28pt;
+      line-height: 1.08;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    h3 {
+      font-size: 16pt;
+      line-height: 1.15;
+      font-weight: 850;
+    }
+
+    .lead {
+      max-width: 230mm;
+      color: #3c4741;
+      font-size: 18pt;
+      font-weight: 520;
+    }
+
+    .dark .lead {
+      color: #cdd8cf;
+    }
+
+    .meta {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 12mm;
+      color: #dce8df;
+      font-size: 13pt;
+    }
+
+    .meta strong {
+      color: #ffffff;
+      font-weight: 850;
+    }
+
+    .title-mark {
+      width: 38mm;
+      height: 38mm;
+      border: 1.4mm solid #74d7a7;
+      display: grid;
+      place-items: center;
+      color: #74d7a7;
+      font-size: 18pt;
+      font-weight: 900;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+      display: grid;
+      gap: 7mm;
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .panel {
+      border-left: 1.2mm solid #2c7a5b;
+      padding: 0 0 0 5mm;
+    }
+
+    .panel p,
+    li {
+      color: #303a35;
+      font-size: 14pt;
+    }
+
+    .dark .panel p,
+    .dark li {
+      color: #dce8df;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 5mm;
+      display: grid;
+      gap: 3.2mm;
+    }
+
+    .compact li {
+      font-size: 12.5pt;
+    }
+
+    .big-list li {
+      font-size: 17pt;
+    }
+
+    .tagline {
+      color: #2c7a5b;
+      font-size: 13pt;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .dark .tagline {
+      color: #74d7a7;
+    }
+
+    .architecture-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 3mm;
+      align-items: stretch;
+    }
+
+    .node {
+      min-height: 28mm;
+      border: .45mm solid #b5c4ba;
+      background: #ffffff;
+      padding: 4mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .node strong {
+      font-size: 12.5pt;
+      line-height: 1.12;
+    }
+
+    .node span {
+      color: #68736c;
+      font-size: 10pt;
+      font-weight: 700;
+    }
+
+    .arrow {
+      position: relative;
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -3mm;
+      width: 3mm;
+      border-top: .5mm solid #2c7a5b;
+    }
+
+    .requirements {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 10mm;
+      align-items: start;
+    }
+
+    .req-list {
+      display: grid;
+      gap: 3.2mm;
+    }
+
+    .req {
+      display: grid;
+      grid-template-columns: 18mm 1fr;
+      gap: 4mm;
+      align-items: baseline;
+      padding-bottom: 2.5mm;
+      border-bottom: .25mm solid #cbd7ce;
+    }
+
+    .req code {
+      color: #2c7a5b;
+      font-size: 12pt;
+      font-weight: 900;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .req span {
+      color: #303a35;
+      font-size: 12.6pt;
+    }
+
+    .image-frame {
+      min-height: 0;
+      overflow: hidden;
+      border: .45mm solid #b9c8bd;
+      background: #ffffff;
+      display: grid;
+      place-items: center;
+      padding: 3mm;
+    }
+
+    .image-frame.dark-frame {
+      background: #0c1118;
+      border-color: #2e3a45;
+    }
+
+    .image-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      object-fit: contain;
+    }
+
+    .figure-title {
+      margin-top: 2.5mm;
+      color: #58635c;
+      font-size: 10.5pt;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .full-figure {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .c4-l1 {
+      height: 92mm;
+    }
+
+    .c4-l2 {
+      width: 136mm;
+      height: 116mm;
+      margin: 0 auto;
+    }
+
+    .c4-l3 {
+      height: 98mm;
+    }
+
+    .screen-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5mm;
+      align-items: center;
+    }
+
+    .phone {
+      height: 118mm;
+      border: .5mm solid #c6d2ca;
+      background: #ffffff;
+      padding: 2mm;
+      display: grid;
+      place-items: center;
+    }
+
+    .phone img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .observability {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 5mm;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .observability .image-frame {
+      min-height: 0;
+    }
+
+    .quote {
+      font-size: 23pt;
+      line-height: 1.16;
+      font-weight: 850;
+      color: #101820;
+      max-width: 240mm;
+    }
+
+    .dark .quote {
+      color: #f6f7f4;
+    }
+
+    .science-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8mm 12mm;
+      align-items: stretch;
+    }
+
+    .principle {
+      border-top: .8mm solid #2c7a5b;
+      padding-top: 4mm;
+    }
+
+    .principle p {
+      color: #303a35;
+      font-size: 14pt;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 3mm;
+      align-items: center;
+      margin-top: 3mm;
+    }
+
+    .flow-step {
+      min-height: 31mm;
+      background: #ffffff;
+      border: .45mm solid #b8c7bc;
+      padding: 4mm;
+      display: grid;
+      align-content: center;
+      gap: 2mm;
+      text-align: center;
+    }
+
+    .flow-step strong {
+      color: #101820;
+      font-size: 12pt;
+    }
+
+    .flow-step span {
+      color: #657169;
+      font-size: 9.5pt;
+      font-weight: 700;
+    }
+
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.2pt;
+    }
+
+    .matrix th,
+    .matrix td {
+      text-align: left;
+      vertical-align: top;
+      padding: 3mm 3mm;
+      border-bottom: .25mm solid #c9d5cc;
+    }
+
+    .matrix th {
+      color: #2c7a5b;
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .matrix td {
+      color: #303a35;
+    }
+
+    .small-note {
+      color: #657169;
+      font-size: 11.5pt;
+      font-weight: 650;
+    }
+
+    .closing {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 12mm;
+      align-items: center;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 4mm;
+      font-size: 15pt;
+    }
+
+    .checklist div {
+      border-left: 1mm solid #74d7a7;
+      padding-left: 5mm;
+      color: #dce8df;
+    }
+
+    @media screen {
+      body {
+        display: grid;
+        gap: 14px;
+        padding: 14px;
+        justify-content: center;
+      }
+
+      .slide {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, .24);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="slide dark">
+    <p class="kicker">Разработка мобильных приложений · ИТМО · 2026</p>
+    <h1>HighLoad Invest Ecosystem</h1>
+    <p class="lead">Программно-аппаратная учебная экосистема имитации биржевых торгов: от Linux kernel module до мобильного терминала, observability и нагрузочного стенда.</p>
+    <div class="meta">
+      <p><strong>Команда:</strong> HighLoad Invest<br><strong>Преподаватель:</strong> Ключев А. О.</p>
+      <div class="title-mark">HLI</div>
+    </div>
+  </section>
+
+  <section class="slide dark">
+    <p class="kicker">Команда проекта</p>
+    <h2>Разработка как коллективная инженерная работа</h2>
+    <div class="grid-2" style="margin-top: 4mm;">
+      <div class="checklist">
+        <div>Ильин Никита Сергеевич</div>
+        <div>Алхимовици Арсений</div>
+        <div>Яснов Михаил Андреевич</div>
+        <div>Плешивцев Кирилл Михайлович</div>
+      </div>
+      <div class="checklist">
+        <div>Соколов Александр Павлович</div>
+        <div>Ильин Александр Алексеевич</div>
+        <div>Вердиев Фада Ильхам оглы</div>
+        <div>Киселев Михаил Васильевич</div>
+      </div>
+    </div>
+    <p class="lead" style="margin-top: auto;">В этом проекте команда отвечает не только за набор сервисов, а за связность общей модели: требования, архитектуру, реализацию, измеримость и честное описание ограничений.</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Что сделано</p>
+    <h2>Учебная брокерская система с полным контуром данных</h2>
+    <div class="science-grid">
+      <div class="principle">
+        <h3>Источник данных</h3>
+        <p>Linux kernel module создаёт <code>/dev/quotes</code>; Go ingestion читает устройство или включает fallback-генератор.</p>
+      </div>
+      <div class="principle">
+        <h3>Хранилища</h3>
+        <p>ClickHouse хранит котировки и свечи. PostgreSQL хранит пользователей, счета, сделки и портфель.</p>
+      </div>
+      <div class="principle">
+        <h3>Backend</h3>
+        <p>API Gateway отдаёт REST/WebSocket API. Core Banking выполняет операции BUY/SELL в транзакции PostgreSQL.</p>
+      </div>
+      <div class="principle">
+        <h3>Клиенты и проверка</h3>
+        <p>Есть Kotlin/Compose и React Native клиенты, load-tester, Jaeger, Prometheus и Grafana.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide dark">
+    <p class="kicker">Что показываем на защите</p>
+    <h2>Не список библиотек, а работающие сценарии и проверяемые свойства</h2>
+    <div class="grid-2">
+      <div>
+        <ul class="big-list">
+          <li><code>GET /api/quotes</code> и <code>GET /api/quotes/{ticker}/candles</code> читают данные из ClickHouse.</li>
+          <li><code>POST /api/trades</code> меняет баланс, портфель и журнал сделок атомарно.</li>
+          <li><code>WS /ws/quotes</code> получает события из Redis Pub/Sub.</li>
+          <li>Jaeger показывает путь запроса, Grafana показывает метрики backend.</li>
+        </ul>
+      </div>
+      <div class="checklist">
+        <div>Котировки можно временно потерять в WebSocket, но история остаётся в ClickHouse.</div>
+        <div>Финансовую операцию нельзя применить частично: PostgreSQL transaction + row locks.</div>
+        <div>Нагрузка задаётся параметрами load-tester, а не словами «держит много».</div>
+        <div>Слабые места названы отдельно, без попытки выдать MVP за production-финтех.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Цель и состав</p>
+    <h2>Полный путь данных от ядра ОС до пользователя</h2>
+    <div class="architecture-strip">
+      <div class="node arrow"><strong>Linux Driver</strong><span>C · /dev/quotes</span></div>
+      <div class="node arrow"><strong>Go Ingestion</strong><span>parse · batch</span></div>
+      <div class="node arrow"><strong>ClickHouse</strong><span>history · candles</span></div>
+      <div class="node arrow"><strong>Redis</strong><span>Pub/Sub</span></div>
+      <div class="node arrow"><strong>API Gateway</strong><span>REST · WS</span></div>
+      <div class="node arrow"><strong>Core Banking</strong><span>ACID trades</span></div>
+      <div class="node"><strong>Mobile Apps</strong><span>Compose · RN</span></div>
+    </div>
+    <div class="grid-3">
+      <div class="panel"><h3>Market Data</h3><p>Котировки являются потоком событий и историческим временным рядом.</p></div>
+      <div class="panel"><h3>Trading</h3><p>Сделки меняют внутреннее финансовое состояние и требуют транзакций.</p></div>
+      <div class="panel"><h3>Observability</h3><p>Метрики и трассы превращают поведение системы в измеряемый объект.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">SRS</p>
+    <h2>Функциональные требования</h2>
+    <div class="requirements">
+      <div class="req-list">
+        <div class="req"><code>FR-01</code><span>Драйвер на C создаёт поток котировок через <code>/dev/quotes</code>.</span></div>
+        <div class="req"><code>FR-03</code><span>Go ingestion пишет котировки в ClickHouse батчами.</span></div>
+        <div class="req"><code>FR-07</code><span>API Gateway рассылает realtime-котировки через <code>WS /ws/quotes</code>.</span></div>
+        <div class="req"><code>FR-11</code><span>BUY списывает деньги и увеличивает позицию в одной транзакции.</span></div>
+        <div class="req"><code>FR-12</code><span>SELL проверяет доступные лоты и фиксирует сделку в PostgreSQL.</span></div>
+        <div class="req"><code>FR-15/16</code><span>Android Native и React Native реализуют одинаковый пользовательский сценарий.</span></div>
+      </div>
+      <div>
+        <h3>Проверяемость</h3>
+        <ul class="compact" style="margin-top: 4mm;">
+          <li>Для каждого FR в отчёте указан критерий приёмки.</li>
+          <li>API проверяется REST/WebSocket-запросами.</li>
+          <li>Финансовые требования проверяются транзакционными тестами.</li>
+          <li>Мобильные требования проверяются ручным сценарием на двух клиентах.</li>
+        </ul>
+        <p class="small-note" style="margin-top: 6mm;">Полный список: FR-01..FR-19 в отчёте.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">SRS</p>
+    <h2>Нефункциональные требования</h2>
+    <table class="matrix">
+      <thead>
+        <tr><th>ID</th><th>Требование</th><th>Как проверяется</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>NFR-01</td><td>Latency realtime-котировок менее 1 секунды на демонстрационном стенде.</td><td>timestamp, WebSocket, Grafana/Jaeger.</td></tr>
+        <tr><td>NFR-02</td><td>Архитектурная готовность к 10 000 активных сессий.</td><td>Load Tester, active sessions, p95/p99 latency.</td></tr>
+        <tr><td>NFR-03</td><td>ACID-консистентность финансовых данных.</td><td>PostgreSQL transactions, <code>SELECT ... FOR UPDATE</code>.</td></tr>
+        <tr><td>NFR-05</td><td>Наблюдаемость через метрики и distributed tracing.</td><td>OpenTelemetry, Prometheus, Grafana, Jaeger.</td></tr>
+        <tr><td>NFR-08</td><td>Разделение уровней абстракции.</td><td>C4, bounded contexts, отсутствие смешения моделей.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 1</p>
+    <h2>Контекст системы</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l1"><img src="../report/C4diagram/L1.png" alt="C4 Level 1"></div>
+      <p class="figure-title">Пользователь, мобильные клиенты, торговая платформа и контур наблюдаемости.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 2</p>
+    <h2>Контейнеры и границы ответственности</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l2"><img src="../report/C4diagram/L2.png" alt="C4 Level 2"></div>
+      <p class="figure-title">Разделение на mobile, API Gateway, Core Banking, ingestion, storage и observability.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 3</p>
+    <h2>API Gateway</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l3"><img src="../report/C4diagram/L3.1.png" alt="C4 Level 3 API Gateway"></div>
+      <p class="figure-title">REST Controller, Service Router, WebSocket Controller и Redis Subscriber.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 3</p>
+    <h2>Linux Quotes Driver</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l3"><img src="../report/C4diagram/L3.2.png" alt="C4 Level 3 Linux Quotes Driver"></div>
+      <p class="figure-title">Char Device <code>/dev/quotes</code>, генератор котировок и кольцевой буфер в kernel space.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 3</p>
+    <h2>Quotes Service</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l3"><img src="../report/C4diagram/L3.3.png" alt="C4 Level 3 Quotes Service"></div>
+      <p class="figure-title">Device Reader, Quote Parser, Batch Writer, Redis publisher и Metrics Exporter.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 3</p>
+    <h2>Auth Service</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l3"><img src="../report/C4diagram/L3.4.png" alt="C4 Level 3 Auth Service"></div>
+      <p class="figure-title">Регистрация, профили пользователей, токены, сессии и PostgreSQL repositories.</p>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">C4 · Level 3</p>
+    <h2>Trade Service</h2>
+    <div class="full-figure">
+      <div class="image-frame c4-l3"><img src="../report/C4diagram/L3.5.png" alt="C4 Level 3 Trade Service"></div>
+      <p class="figure-title">Order Processor, Balance Manager, Portfolio Manager, Price Checker и SQL Repository.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Поток котировок</p>
+    <h2>Как котировка попадает на экран</h2>
+    <div class="flow">
+      <div class="flow-step"><strong>Driver</strong><span>kernel events</span></div>
+      <div class="flow-step"><strong>/dev/quotes</strong><span>character device</span></div>
+      <div class="flow-step"><strong>Go ingestion</strong><span>parse + batch</span></div>
+      <div class="flow-step"><strong>ClickHouse</strong><span>source of truth</span></div>
+      <div class="flow-step"><strong>Redis</strong><span>at-most-once push</span></div>
+      <div class="flow-step"><strong>Mobile UI</strong><span>projection</span></div>
+    </div>
+    <div class="grid-3">
+      <div class="panel"><h3>ClickHouse</h3><p>Хранит таблицу <code>quotes</code>; из неё строятся последние цены и OHLCV-свечи.</p></div>
+      <div class="panel"><h3>Redis</h3><p>Используется как Pub/Sub-канал <code>quotes:updates</code>, не как источник истины.</p></div>
+      <div class="panel"><h3>Компромисс</h3><p>Batch снижает стоимость записи в ClickHouse, но добавляет задержку flush.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Финансовый контур</p>
+    <h2>Core Banking: что происходит при сделке</h2>
+    <div class="grid-2">
+      <div>
+        <ul class="big-list">
+          <li>Вход: <code>userId</code>, <code>ticker</code>, <code>action</code>, <code>lots</code>, <code>pricePerLot</code>.</li>
+          <li><code>SELECT ... FOR UPDATE</code> блокирует счёт пользователя на время операции.</li>
+          <li>BUY проверяет баланс; SELL проверяет доступные лоты.</li>
+          <li>После проверки обновляются <code>accounts</code>, <code>portfolio</code>, <code>trades</code> и выполняется <code>COMMIT</code>.</li>
+        </ul>
+      </div>
+      <div class="image-frame dark-frame" style="height: 95mm;">
+        <img src="../report/screenshots/jaeger-core-banking-traces.png" alt="Jaeger Core Banking traces">
+      </div>
+    </div>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">Мобильные клиенты</p>
+    <h2>Один пользовательский сценарий в двух реализациях</h2>
+    <div class="screen-row">
+      <div class="phone"><img src="../report/screenshots/photo_1_2026-05-07_16-23-14.jpg" alt="Start screen"></div>
+      <div class="phone"><img src="../report/screenshots/photo_8_2026-05-07_16-23-14.jpg" alt="Quotes screen"></div>
+      <div class="phone"><img src="../report/screenshots/photo_4_2026-05-07_16-23-14.jpg" alt="Chart trade screen"></div>
+      <div class="phone"><img src="../report/screenshots/photo_5_2026-05-07_16-23-14.jpg" alt="Account screen"></div>
+      <div class="phone"><img src="../report/screenshots/photo_9_2026-05-07_16-23-14.jpg" alt="Profile screen"></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Сравнение mobile-подходов</p>
+    <h2>Native и React Native: что сравниваем</h2>
+    <table class="matrix">
+      <thead>
+        <tr><th>Критерий</th><th>Android Native</th><th>React Native</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Язык и UI</td><td>Kotlin + Jetpack Compose</td><td>TypeScript + React Native</td></tr>
+        <tr><td>Состояние</td><td>ViewModel + StateFlow</td><td>React hooks</td></tr>
+        <tr><td>Сильная сторона</td><td>Контроль lifecycle и Android API</td><td>Быстрый MVP и потенциальная мультиплатформенность</td></tr>
+        <tr><td>Риск</td><td>Больше платформенного кода</td><td>Runtime-ошибки API без общей схемы DTO</td></tr>
+        <tr><td>Итог</td><td colspan="2">Оба клиента работают с одним API; различается скорость разработки, контроль платформы и сложность поддержки UI.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="slide visual">
+    <p class="kicker">Observability</p>
+    <h2>Что видно в Grafana и Jaeger</h2>
+    <div class="observability">
+      <div class="image-frame dark-frame"><img src="../report/screenshots/grafana-backend-overview.png" alt="Grafana backend overview"></div>
+      <div class="image-frame dark-frame"><img src="../report/screenshots/grafana-dashboard-list.png" alt="Grafana dashboards"></div>
+      <div class="image-frame dark-frame"><img src="../report/screenshots/jaeger-trade-trace.png" alt="Jaeger trade trace"></div>
+      <div class="image-frame dark-frame"><img src="../report/screenshots/jaeger-core-banking-traces.png" alt="Jaeger core banking"></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Нагрузка</p>
+    <h2>Как устроен load-tester</h2>
+    <div class="grid-3">
+      <div class="panel"><h3>Профиль</h3><p>Боты создают пользователей, читают котировки, выполняют BUY/SELL и держат WebSocket.</p></div>
+      <div class="panel"><h3>Параметры</h3><p><code>BOT_COUNT</code>, <code>ACTIVE_REQUESTS</code>, <code>WS_PERCENT</code>, <code>DURATION_SEC</code>, задержки между запросами.</p></div>
+      <div class="panel"><h3>Метрики</h3><p>RPS, error rate, avg/p95/p99 latency, число WebSocket-сессий, состояние БД и сервисов.</p></div>
+    </div>
+    <p class="quote" style="margin-top: 5mm;">Главная метрика не «запустилось», а latency и error rate при заданном профиле нагрузки.</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Честная самокритика</p>
+    <h2>Где архитектура упрощена и что надо усиливать</h2>
+    <div class="grid-2">
+      <ul class="compact">
+        <li><code>Double</code> для денег — учебное упрощение; нужен decimal domain.</li>
+        <li>Цена сделки приходит от клиента; нужен серверный price snapshot.</li>
+        <li>Redis Pub/Sub — at-most-once, не подходит для финансовых событий.</li>
+        <li>WebSocket broadcast требует backpressure и очередей на сессию.</li>
+      </ul>
+      <ul class="compact">
+        <li>DTO дублируются между backend и мобильными клиентами.</li>
+        <li>Нужны OpenAPI-контракт и contract tests.</li>
+        <li>Load testing должен фиксировать p95/p99, а не только среднее.</li>
+        <li>Observability требует SLO, alert rules и trace-id в логах.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide dark">
+    <p class="kicker">Итог</p>
+    <div class="closing">
+      <div>
+        <h2>Что готово к демонстрации</h2>
+        <p class="lead" style="margin-top: 8mm;">Стенд поднимается через Docker Compose, клиенты работают с единым API, котировки идут через ClickHouse/Redis/WebSocket, сделки фиксируются в PostgreSQL, а поведение системы видно в Jaeger и Grafana.</p>
+      </div>
+      <div class="checklist">
+        <div>C4-модель</div>
+        <div>SRS: FR-01..FR-24, NFR-01..NFR-16</div>
+        <div>Два мобильных клиента</div>
+        <div>Jaeger/Grafana evidence</div>
+        <div>Фундаментальный системный анализ</div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

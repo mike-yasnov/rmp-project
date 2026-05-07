@@ -289,9 +289,14 @@ table {
   width: 100%;
   margin: 4mm 0 6mm 0;
   border-collapse: collapse;
-  page-break-inside: avoid;
+  page-break-inside: auto;
   font-size: 12pt;
   line-height: 1.25;
+}
+
+tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 thead,
@@ -309,6 +314,14 @@ td {
 
 th {
   font-weight: 700;
+  text-align: center;
+}
+
+th:first-child,
+td:first-child {
+  width: 18mm;
+  min-width: 18mm;
+  white-space: nowrap;
   text-align: center;
 }
 
@@ -382,7 +395,7 @@ figcaption{font-size:.95em;margin-top:.35rem;text-align:center;text-indent:0;}
 <div class="title-people">
 <table>
 <tbody>
-<tr><td>Студенты:</td><td>Ильин Никита Сергеевич<br>Алхимовици Арсений<br>Яснов Михаил Андреевич<br>Плешивцев Кирилл Михайлович<br>Соколов Александр Павлович</td></tr>
+<tr><td>Студенты:</td><td>Ильин Никита Сергеевич<br>Алхимовици Арсений<br>Яснов Михаил Андреевич<br>Плешивцев Кирилл Михайлович<br>Соколов Александр Павлович<br>Ильин Александр Алексеевич<br>Вердиев Фада Ильхам оглы<br>Киселев Михаил Васильевич</td></tr>
 <tr><td>Преподаватель:</td><td>Ключев А. О.</td></tr>
 </tbody>
 </table>
@@ -422,7 +435,7 @@ figcaption{font-size:.95em;margin-top:.35rem;text-align:center;text-indent:0;}
 <a class="toc-row toc-level-2" href="#sec-7">
 <span class="toc-title">Технологические требования</span>
 <span class="toc-dots"></span>
-<span class="toc-page">6</span>
+<span class="toc-page">5</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-8">
 <span class="toc-title">Функциональные требования</span>
@@ -432,132 +445,132 @@ figcaption{font-size:.95em;margin-top:.35rem;text-align:center;text-indent:0;}
 <a class="toc-row toc-level-2" href="#sec-9">
 <span class="toc-title">Нефункциональные требования</span>
 <span class="toc-dots"></span>
-<span class="toc-page">6</span>
+<span class="toc-page">8</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-10">
 <span class="toc-title">ОПИСАНИЕ АРХИТЕКТУРЫ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">8</span>
+<span class="toc-page">10</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-11">
 <span class="toc-title">Архитектурная идея</span>
 <span class="toc-dots"></span>
-<span class="toc-page">8</span>
+<span class="toc-page">10</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-12">
 <span class="toc-title">Архитектура в модели C4</span>
 <span class="toc-dots"></span>
-<span class="toc-page">8</span>
+<span class="toc-page">10</span>
 </a>
 <a class="toc-row toc-level-3" href="#sec-13">
 <span class="toc-title">Уровень 1. System Context</span>
 <span class="toc-dots"></span>
-<span class="toc-page">8</span>
+<span class="toc-page">10</span>
 </a>
 <a class="toc-row toc-level-3" href="#sec-14">
 <span class="toc-title">Уровень 2. Container</span>
 <span class="toc-dots"></span>
-<span class="toc-page">9</span>
+<span class="toc-page">11</span>
 </a>
 <a class="toc-row toc-level-3" href="#sec-15">
 <span class="toc-title">Уровень 3. Component</span>
 <span class="toc-dots"></span>
-<span class="toc-page">10</span>
+<span class="toc-page">12</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-16">
 <span class="toc-title">Основные потоки данных</span>
 <span class="toc-dots"></span>
-<span class="toc-page">15</span>
+<span class="toc-page">17</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-17">
 <span class="toc-title">Хранилища данных</span>
 <span class="toc-dots"></span>
-<span class="toc-page">16</span>
+<span class="toc-page">18</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-18">
 <span class="toc-title">Архитектурные ограничения</span>
 <span class="toc-dots"></span>
-<span class="toc-page">16</span>
+<span class="toc-page">18</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-19">
 <span class="toc-title">ОПИСАНИЕ РЕАЛИЗАЦИИ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">17</span>
+<span class="toc-page">19</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-20">
 <span class="toc-title">Backend</span>
 <span class="toc-dots"></span>
-<span class="toc-page">17</span>
+<span class="toc-page">19</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-21">
 <span class="toc-title">Получение котировок</span>
 <span class="toc-dots"></span>
-<span class="toc-page">17</span>
+<span class="toc-page">19</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-22">
 <span class="toc-title">Мобильные приложения</span>
 <span class="toc-dots"></span>
-<span class="toc-page">18</span>
+<span class="toc-page">20</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-23">
 <span class="toc-title">Развёртывание</span>
 <span class="toc-dots"></span>
-<span class="toc-page">18</span>
+<span class="toc-page">20</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-24">
 <span class="toc-title">Наблюдаемость</span>
 <span class="toc-dots"></span>
-<span class="toc-page">18</span>
+<span class="toc-page">20</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-25">
 <span class="toc-title">ОПИСАНИЕ СИСТЕМЫ ТЕСТИРОВАНИЯ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">23</span>
+<span class="toc-page">25</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-26">
 <span class="toc-title">Проверяемые сценарии</span>
 <span class="toc-dots"></span>
-<span class="toc-page">23</span>
+<span class="toc-page">25</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-27">
 <span class="toc-title">Smoke-тестирование</span>
 <span class="toc-dots"></span>
-<span class="toc-page">23</span>
+<span class="toc-page">25</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-28">
 <span class="toc-title">Проверка котировок</span>
 <span class="toc-dots"></span>
-<span class="toc-page">23</span>
+<span class="toc-page">25</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-29">
 <span class="toc-title">Нагрузочное тестирование</span>
 <span class="toc-dots"></span>
-<span class="toc-page">24</span>
+<span class="toc-page">26</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-30">
 <span class="toc-title">Тестовое инструментальное обеспечение</span>
 <span class="toc-dots"></span>
-<span class="toc-page">25</span>
+<span class="toc-page">27</span>
 </a>
 <a class="toc-row toc-level-2" href="#sec-31">
 <span class="toc-title">Проверка сборки мобильных приложений</span>
 <span class="toc-dots"></span>
-<span class="toc-page">26</span>
+<span class="toc-page">28</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-32">
 <span class="toc-title">ЗАКЛЮЧЕНИЕ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">27</span>
+<span class="toc-page">29</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-33">
 <span class="toc-title">СПИСОК ЛИТЕРАТУРЫ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">28</span>
+<span class="toc-page">30</span>
 </a>
 <a class="toc-row toc-level-1" href="#sec-34">
 <span class="toc-title">ПРИЛОЖЕНИЕ А. ЭССЕ</span>
 <span class="toc-dots"></span>
-<span class="toc-page">29</span>
+<span class="toc-page">31</span>
 </a></nav>
 <h1 id="sec-1">Введение</h1>
 <p>Курсовая работа посвящена разработке учебной экосистемы брокерского приложения:
@@ -623,7 +636,7 @@ Android-клиенты получают котировки, пользовате
 </tr>
 <tr>
 <td>Кэш и сообщения</td>
-<td>Redis или KeyDB</td>
+<td>Redis</td>
 </tr>
 <tr>
 <td>Пользовательские данные</td>
@@ -643,23 +656,192 @@ Android-клиенты получают котировки, пользовате
 </tr>
 </tbody></table>
 <h2 id="sec-8">Функциональные требования</h2>
-<p>Система должна поддерживать:</p>
-<ul>
-<li>получение котировок от имитированной биржи;</li>
-<li>сохранение котировок и истории цен;</li>
-<li>выдачу котировок мобильным клиентам через REST и WebSocket;</li>
-<li>регистрацию учебного пользователя;</li>
-<li>создание инвестиционного счёта;</li>
-<li>пополнение счёта условными средствами;</li>
-<li>покупку и продажу активов лотами;</li>
-<li>просмотр портфеля пользователя;</li>
-<li>нагрузочное тестирование с имитацией 10 000 клиентов.</li>
-</ul>
+<p>Функциональные требования сформулированы в формате SRS: каждое требование
+имеет идентификатор, проверяемую формулировку и критерий приёмки.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Требование</th>
+<th>Критерий приёмки</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-01</td>
+<td>Система должна генерировать поток котировок на уровне ядра Linux через драйвер на C.</td>
+<td>После загрузки модуля доступно устройство <code>/dev/quotes</code>, из которого можно читать котировки.</td>
+</tr>
+<tr>
+<td>FR-02</td>
+<td>Ingestion-сервис должен читать котировки из <code>/dev/quotes</code> или fallback-генератора и нормализовать их к структуре <code>ticker</code>, <code>price</code>, <code>volume</code>, <code>timestamp</code>.</td>
+<td>Валидные строки драйвера преобразуются в объекты котировок; невалидные строки не останавливают обработку.</td>
+</tr>
+<tr>
+<td>FR-03</td>
+<td>Ingestion-сервис должен батчами сохранять котировки в ClickHouse.</td>
+<td>Таблица <code>quotes</code> пополняется новыми записями; размер батча и интервал flush управляются параметрами окружения.</td>
+</tr>
+<tr>
+<td>FR-04</td>
+<td>ClickHouse должен выступать источником истины для текущих и исторических котировок.</td>
+<td>API получает последние цены и свечные данные выборками из ClickHouse.</td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td>API Gateway должен предоставлять REST endpoint для получения списка последних котировок.</td>
+<td><code>GET /api/quotes</code> возвращает JSON-массив актуальных котировок.</td>
+</tr>
+<tr>
+<td>FR-06</td>
+<td>API Gateway должен предоставлять REST endpoint для получения свечных данных по тикеру.</td>
+<td><code>GET /api/quotes/{ticker}/candles?from=...&amp;to=...</code> возвращает OHLCV-данные.</td>
+</tr>
+<tr>
+<td>FR-07</td>
+<td>Система должна доставлять realtime-обновления котировок через WebSocket.</td>
+<td>Подключённый клиент <code>WS /ws/quotes</code> получает сообщения, опубликованные ingestion-сервисом через Redis Pub/Sub.</td>
+</tr>
+<tr>
+<td>FR-08</td>
+<td>Backend должен предоставлять единый внешний API для native Android и React Native клиентов.</td>
+<td>Оба клиента используют одинаковые REST/WebSocket endpoints.</td>
+</tr>
+<tr>
+<td>FR-09</td>
+<td>Система должна позволять создать учебного пользователя и инвестиционный счёт.</td>
+<td><code>POST /api/users</code> создаёт пользователя, счёт и возвращает идентификатор пользователя.</td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td>Система должна поддерживать пополнение учебного счёта условными средствами.</td>
+<td><code>POST /api/accounts/{userId}/deposit</code> увеличивает баланс пользователя в PostgreSQL.</td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td>Система должна исполнять BUY-заявку при достаточном балансе.</td>
+<td>Покупка уменьшает баланс, увеличивает позицию портфеля и записывает сделку в одной транзакции.</td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td>Система должна исполнять SELL-заявку при достаточном количестве лотов.</td>
+<td>Продажа увеличивает баланс, уменьшает позицию портфеля и записывает сделку в одной транзакции.</td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td>Система должна отклонять некорректные торговые операции.</td>
+<td>Неположительные лоты, неположительная цена, недостаточный баланс или недостаточная позиция возвращают ошибку без изменения финансовых данных.</td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td>Система должна возвращать портфель пользователя.</td>
+<td><code>GET /api/portfolio/{userId}</code> возвращает баланс, валюту и список позиций по тикерам.</td>
+</tr>
+<tr>
+<td>FR-15</td>
+<td>Native Android клиент должен реализовывать основной пользовательский сценарий.</td>
+<td>Пользователь может зарегистрироваться, видеть котировки, получить realtime-обновление, пополнить счёт, купить/продать лоты и посмотреть портфель.</td>
+</tr>
+<tr>
+<td>FR-16</td>
+<td>React Native клиент должен реализовывать тот же основной сценарий.</td>
+<td>Cross-platform клиент функционально сопоставим с native Android клиентом.</td>
+</tr>
+<tr>
+<td>FR-17</td>
+<td>Система должна собирать метрики и распределённые трассы.</td>
+<td>Метрики доступны в Grafana/Prometheus, traces доступны в Jaeger.</td>
+</tr>
+<tr>
+<td>FR-18</td>
+<td>Система должна включать нагрузочный тестер.</td>
+<td>Load-tester создаёт пользователей, выполняет REST-запросы, торговые операции и WebSocket-подключения с параметризуемой нагрузкой.</td>
+</tr>
+<tr>
+<td>FR-19</td>
+<td>Система должна воспроизводимо запускаться на стенде.</td>
+<td>Docker Compose поднимает PostgreSQL, ClickHouse, Redis, backend, ingestion и observability-компоненты с healthcheck-ами.</td>
+</tr>
+</tbody></table>
 <h2 id="sec-9">Нефункциональные требования</h2>
-<p>Основное нефункциональное требование — возможность обслуживать до 10 000
-логических клиентов на тестовом стенде. Финансовые операции должны сохранять
-согласованность пользовательских балансов и портфелей. Система должна быть
-воспроизводимо развёрнута через Docker Compose.</p>
+<p>Нефункциональные требования определяют не отдельные функции, а свойства системы:
+производительность, согласованность, наблюдаемость, сопровождаемость и
+воспроизводимость.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Категория</th>
+<th>Требование</th>
+<th>Проверка</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NFR-01</td>
+<td>Performance</td>
+<td>Задержка доставки realtime-котировки на клиентский терминал должна стремиться к значению менее 1 секунды на демонстрационном стенде.</td>
+<td>Сравнение timestamp котировки, WebSocket-доставки, UI-обновления и trace/metrics в Grafana/Jaeger.</td>
+</tr>
+<tr>
+<td>NFR-02</td>
+<td>Scalability</td>
+<td>Архитектура должна быть рассчитана на сценарий до 10 000 активных пользовательских сессий.</td>
+<td>Запуск load-tester с параметрами <code>BOT_COUNT</code>, <code>ACTIVE_REQUESTS</code>, <code>WS_PERCENT</code>; контроль error rate и latency.</td>
+</tr>
+<tr>
+<td>NFR-03</td>
+<td>Consistency</td>
+<td>Финансовые данные должны сохранять ACID-согласованность.</td>
+<td>Core Banking выполняет сделки в транзакции PostgreSQL с блокировками <code>SELECT ... FOR UPDATE</code>.</td>
+</tr>
+<tr>
+<td>NFR-04</td>
+<td>Consistency</td>
+<td>Market-data контур может иметь eventual consistency и потерю промежуточных realtime-событий, но исторические котировки должны сохраняться в ClickHouse.</td>
+<td>Сравнение данных WebSocket, REST API и таблицы <code>quotes</code> в ClickHouse.</td>
+</tr>
+<tr>
+<td>NFR-05</td>
+<td>Observability</td>
+<td>Поведение backend и ingestion должно быть наблюдаемым через метрики и распределённые трассы.</td>
+<td>Наличие Grafana dashboard, Prometheus metrics и Jaeger traces.</td>
+</tr>
+<tr>
+<td>NFR-06</td>
+<td>Operability</td>
+<td>Система должна воспроизводимо разворачиваться из репозитория.</td>
+<td>Запуск стенда через <code>docker compose up -d --build</code> без ручной установки БД и observability-инструментов.</td>
+</tr>
+<tr>
+<td>NFR-07</td>
+<td>Reliability</td>
+<td>При недоступности <code>/dev/quotes</code> демонстрационный стенд должен иметь fallback-режим генерации котировок.</td>
+<td>Ingestion запускается без драйвера и всё равно публикует котировки в ClickHouse/Redis.</td>
+</tr>
+<tr>
+<td>NFR-08</td>
+<td>Maintainability</td>
+<td>Архитектура должна явно разделять уровни: kernel/device, ingestion, storage, domain, API, UI и observability.</td>
+<td>C4-диаграммы и структура кода не смешивают физические устройства, СУБД, доменные операции и UI.</td>
+</tr>
+<tr>
+<td>NFR-09</td>
+<td>Reliability</td>
+<td>Система должна различать допустимые и недопустимые потери данных.</td>
+<td>Потеря WebSocket-сообщения котировки допустима; потеря или частичное применение финансовой транзакции недопустимы.</td>
+</tr>
+<tr>
+<td>NFR-10</td>
+<td>Testability</td>
+<td>Критичные сценарии должны быть проверяемы автоматическими или воспроизводимыми ручными тестами.</td>
+<td>Unit/integration tests, Bruno/API-запросы, load-tester, Jaeger/Grafana evidence.</td>
+</tr>
+<tr>
+<td>NFR-11</td>
+<td>Documentation</td>
+<td>Архитектура должна быть описана в C4-модели и связана с требованиями.</td>
+<td>В отчёте представлены C4 Level 1/2/3, SRS-таблицы требований и описание основных потоков данных.</td>
+</tr>
+</tbody></table>
 <h1 id="sec-10">Описание архитектуры</h1>
 <h2 id="sec-11">Архитектурная идея</h2>
 <p>Архитектура построена как микросервисная система, так как практическое задание
@@ -1072,36 +1254,28 @@ Docker Compose.</p>
 <li><p>ГОСТ 7.32-2017. Отчёт о научно-исследовательской работе. Структура и правила
 оформления.</p>
 </li>
-<li><p>Ktor Documentation. — JetBrains. URL: <a href="https://ktor.io/docs/welcome.html">https://ktor.io/docs/welcome.html</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>Ktor Documentation. — JetBrains. URL: <a href="https://ktor.io/docs/welcome.html">https://ktor.io/docs/welcome.html</a>.</p>
 </li>
 <li><p>Android Developers: Jetpack Compose. — Google.
-URL: <a href="https://developer.android.com/jetpack/compose">https://developer.android.com/jetpack/compose</a> (дата обращения:
-07.05.2026).</p>
+URL: <a href="https://developer.android.com/jetpack/compose">https://developer.android.com/jetpack/compose</a>.</p>
 </li>
-<li><p>React Native Documentation. — Meta. URL: <a href="https://reactnative.dev/docs/getting-started">https://reactnative.dev/docs/getting-started</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>React Native Documentation. — Meta. URL: <a href="https://reactnative.dev/docs/getting-started">https://reactnative.dev/docs/getting-started</a>.</p>
 </li>
-<li><p>ClickHouse Documentation. — ClickHouse Inc. URL: <a href="https://clickhouse.com/docs">https://clickhouse.com/docs</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>ClickHouse Documentation. — ClickHouse Inc. URL: <a href="https://clickhouse.com/docs">https://clickhouse.com/docs</a>.</p>
 </li>
 <li><p>PostgreSQL Documentation. — PostgreSQL Global Development Group.
-URL: <a href="https://www.postgresql.org/docs/">https://www.postgresql.org/docs/</a> (дата обращения: 07.05.2026).</p>
+URL: <a href="https://www.postgresql.org/docs/">https://www.postgresql.org/docs/</a>.</p>
 </li>
-<li><p>OpenTelemetry Documentation. — CNCF. URL: <a href="https://opentelemetry.io/docs/">https://opentelemetry.io/docs/</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>OpenTelemetry Documentation. — CNCF. URL: <a href="https://opentelemetry.io/docs/">https://opentelemetry.io/docs/</a>.</p>
 </li>
 <li><p>The Linux Kernel Module Programming Guide. URL:
-<a href="https://sysprog21.github.io/lkmpg/">https://sysprog21.github.io/lkmpg/</a> (дата обращения: 07.05.2026).</p>
+<a href="https://sysprog21.github.io/lkmpg/">https://sysprog21.github.io/lkmpg/</a>.</p>
 </li>
-<li><p>Jaeger Documentation. — CNCF. URL: <a href="https://www.jaegertracing.io/docs/">https://www.jaegertracing.io/docs/</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>Jaeger Documentation. — CNCF. URL: <a href="https://www.jaegertracing.io/docs/">https://www.jaegertracing.io/docs/</a>.</p>
 </li>
-<li><p>Prometheus Documentation. URL: <a href="https://prometheus.io/docs/">https://prometheus.io/docs/</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>Prometheus Documentation. URL: <a href="https://prometheus.io/docs/">https://prometheus.io/docs/</a>.</p>
 </li>
-<li><p>Grafana Documentation. URL: <a href="https://grafana.com/docs/">https://grafana.com/docs/</a>
-(дата обращения: 07.05.2026).</p>
+<li><p>Grafana Documentation. URL: <a href="https://grafana.com/docs/">https://grafana.com/docs/</a>.</p>
 </li>
 </ol>
 <h1 id="sec-34">Приложение А. Эссе</h1>
