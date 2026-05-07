@@ -17,14 +17,14 @@
 | Критерий | Kotlin + Jetpack Compose | React Native + Expo |
 |----------|--------------------------|---------------------|
 | Язык | Kotlin | TypeScript |
-| Минимум платформы | Android 8.0 (`minSdk 26`) | Expo 55, RN 0.85 |
+| Минимум платформы | Android 8.0 (`minSdk 26`) | Expo 55, RN 0.83.6 |
 | Целевые платформы | Только Android | Android (в `app.json` пока), легко расширяется на iOS |
 | Входной порог | Выше: Android Studio, Gradle, lifecycle | Ниже: Node/npm, Expo CLI |
 | Скорость прототипирования | Средняя | Высокая (hot reload) |
 | Доступ к Android API | Прямой, без bridge | Через RN API / native modules |
 | UI-производительность | Предсказуемая нативная отрисовка | Достаточная для MVP, зависит от JS bridge |
 | Типизация | Kotlin, строгая на этапе компиляции | TypeScript, строгая в проекте |
-| Размер APK | ~6 MB | ~25 MB (RN bundle + JS engine) |
+| Размер APK | ~10 MB | ~59 MB (RN bundle + JS engine) |
 | Холодный старт | ~1.5 c | ~3 c |
 | Сборка | Android SDK 35 + JDK 17 + Gradle | `npm install` + `expo run:android` |
 | Поддержка WebSocket | OkHttp `WebSocket` | Стандартный `WebSocket` API |
@@ -122,22 +122,23 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 URL backend задаётся в `app/build.gradle.kts`:
 ```kotlin
-buildConfigField("String", "API_BASE_URL", "\"http://185.182.108.214\"")
+buildConfigField("String", "API_BASE_URL", "\"http://192.168.125.125:8080\"")
 ```
 
-Значение по умолчанию — `http://10.0.2.2:8080` (host-машина из эмулятора).
+Для установки на физический телефон используется LAN-адрес backend-хоста.
 
 ### React Native
 
 ```bash
 cd mobile-react-native
-npm install                                                    # ~539 пакетов
+npm install
 npm run typecheck                                              # tsc --noEmit
-EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214 npm run android
+npm run android
 ```
 
 Подтверждено backend-командой: `npm install` отрабатывает чисто, `tsc --noEmit`
-проходит без ошибок (TypeScript 6.0.3).
+проходит без ошибок (TypeScript 5.9.3). Release APK собирается через
+`android/gradlew :app:assembleRelease`.
 
 ## 6. Выводы
 
@@ -145,7 +146,7 @@ EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214 npm run android
 |----------|-----------|
 | UI-производительность | **Native** (Compose 60 fps без подготовки) |
 | Скорость разработки | **RN** (hot reload, hooks, нет XML-layout) |
-| Размер APK | **Native** (~6 MB vs ~25 MB) |
+| Размер APK | **Native** (~10 MB vs ~59 MB) |
 | Кросс-платформенность | **RN** (один JS-код для Android и iOS) |
 | Безопасность типов | **Native** (compile-time `kotlinx.serialization`) |
 | Структура кода | **Native** (отдельные модули) |
@@ -166,7 +167,7 @@ Backend-стенд уже готов. Команде mobile remains запуст
 
 1. `mobile-native`: `./gradlew assembleDebug && adb install ...` → открыть приложение
    → создать пользователя → купить 2 лота MSFT → проверить портфель.
-2. `mobile-react-native`: `EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214 npm run android`
+2. `mobile-react-native`: `npm run android`
    → пройти тот же сценарий.
 3. Сделать скриншоты основных экранов и положить в `mobile-native/screens/` /
    `mobile-react-native/screens/`.

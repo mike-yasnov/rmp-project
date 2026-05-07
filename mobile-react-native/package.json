@@ -5,17 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "expo": "55.0.23",
-    "react": "19.2.5",
-    "react-native": "0.85.3"
+    "react": "19.2.0",
+    "react-native": "0.83.6"
   },
   "devDependencies": {
     "@types/react": "19.2.14",
-    "typescript": "6.0.3"
+    "typescript": "~5.9.2"
   },
   "overrides": {
     "postcss": "8.5.10"
