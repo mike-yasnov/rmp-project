@@ -5,7 +5,8 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "platforms": ["android"],
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0A0E14",
     "android": {
       "package": "com.highloadinvest.reactnative",
       "usesCleartextTraffic": true

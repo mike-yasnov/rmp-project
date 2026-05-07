@@ -2,6 +2,8 @@ package com.highloadinvest.banking.infrastructure.postgres
 
 import com.highloadinvest.banking.application.usecases.ExecuteTrade
 import com.highloadinvest.banking.application.usecases.TradeExecutor
+import com.highloadinvest.banking.domain.entities.LimitOrder
+import com.highloadinvest.banking.domain.entities.OrderSide
 import com.highloadinvest.banking.domain.entities.Trade
 import com.highloadinvest.banking.domain.entities.TradeAction
 import com.highloadinvest.banking.infrastructure.observability.BankingMetrics
@@ -101,6 +103,90 @@ class PostgresTradeExecutor(
                 } catch (e: Throwable) {
                     conn.rollback()
                     metrics?.tradesFailed?.add(1, attrs)
+                    span.recordException(e)
+                    span.setStatus(StatusCode.ERROR, e.message ?: "")
+                    throw e
+                } finally {
+                    span.end()
+                }
+            }
+        }
+    }
+
+    /**
+     * Atomic fill of a PENDING limit order at the given market price.
+     * BUY: balance was already reduced by reservedAmount at placement; we now release reservation
+     * and credit cashback (reservedAmount − lots*marketPrice) since fill is at marketPrice ≤ limitPrice.
+     * SELL: credit balance, reduce position.
+     * Throws IllegalArgumentException with INSUFFICIENT_LOTS / INSUFFICIENT_FUNDS markers.
+     */
+    fun executeFromLimit(order: LimitOrder, marketPrice: Double): Trade {
+        require(marketPrice > 0) { "Market price must be positive" }
+        val totalAmount = order.lots * marketPrice
+        val trade = Trade(
+            id = UUID.randomUUID(),
+            userId = order.userId,
+            ticker = order.ticker.uppercase(),
+            action = if (order.side == OrderSide.BUY) TradeAction.BUY else TradeAction.SELL,
+            lots = order.lots,
+            pricePerLot = marketPrice,
+            totalAmount = totalAmount,
+            createdAt = Instant.now()
+        )
+
+        val span = tracer.spanBuilder("order.fill")
+            .setSpanKind(SpanKind.INTERNAL)
+            .setAttribute("order.id", order.id.toString())
+            .setAttribute("order.side", order.side.name)
+            .setAttribute("order.ticker", trade.ticker)
+            .setAttribute("order.lots", order.lots.toLong())
+            .setAttribute("order.market_price", marketPrice)
+            .startSpan()
+
+        return span.makeCurrent().use { _ ->
+            DatabaseFactory.connection().use { conn ->
+                try {
+                    conn.transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+
+                    when (order.side) {
+                        OrderSide.BUY -> {
+                            // Release reservation; cashback = reservedAmount − totalAmount (≥ 0).
+                            val cashback = order.reservedAmount - totalAmount
+                            // reserved_balance -= reservedAmount; balance += cashback
+                            conn.prepareStatement(
+                                """
+                                UPDATE accounts
+                                SET reserved_balance = GREATEST(COALESCE(reserved_balance, 0) - ?, 0),
+                                    balance = balance + ?
+                                WHERE user_id = ?
+                                """.trimIndent()
+                            ).use { stmt ->
+                                stmt.setDouble(1, order.reservedAmount)
+                                stmt.setDouble(2, cashback)
+                                stmt.setObject(3, order.userId)
+                                val rows = stmt.executeUpdate()
+                                if (rows == 0) throw NoSuchElementException("Account not found for user ${order.userId}")
+                            }
+                            upsertBoughtPosition(conn, order.userId, trade.ticker, order.lots, marketPrice)
+                        }
+
+                        OrderSide.SELL -> {
+                            val currentLots = selectLotsForUpdate(conn, order.userId, trade.ticker)
+                            if (currentLots < order.lots) {
+                                throw IllegalArgumentException("INSUFFICIENT_LOTS: have=$currentLots, required=${order.lots}")
+                            }
+                            val balance = selectBalanceForUpdate(conn, order.userId)
+                            updateBalance(conn, order.userId, balance + totalAmount)
+                            reducePosition(conn, order.userId, trade.ticker, order.lots)
+                        }
+                    }
+
+                    insertTrade(conn, trade)
+                    conn.commit()
+                    span.setStatus(StatusCode.OK)
+                    trade
+                } catch (e: Throwable) {
+                    conn.rollback()
                     span.recordException(e)
                     span.setStatus(StatusCode.ERROR, e.message ?: "")
                     throw e

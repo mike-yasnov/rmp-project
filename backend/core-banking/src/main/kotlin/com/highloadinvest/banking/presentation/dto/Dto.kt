@@ -26,15 +26,30 @@ data class TradeResponse(
 @Serializable
 data class PortfolioResponse(
     val balance: Double,
+    val reservedBalance: Double,
+    val availableBalance: Double,
     val currency: String,
-    val positions: List<PositionResponse>
+    val positions: List<PositionResponse>,
+    val totals: PortfolioTotals
 )
 
 @Serializable
 data class PositionResponse(
     val ticker: String,
     val lots: Int,
-    val avgPrice: Double
+    val avgPrice: Double,
+    val currentPrice: Double = 0.0,
+    val marketValue: Double = 0.0,
+    val unrealizedPnl: Double = 0.0,
+    val unrealizedPnlPercent: Double = 0.0
+)
+
+@Serializable
+data class PortfolioTotals(
+    val invested: Double,
+    val marketValue: Double,
+    val unrealizedPnl: Double,
+    val unrealizedPnlPercent: Double
 )
 
 @Serializable

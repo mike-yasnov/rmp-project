@@ -1,6 +1,7 @@
 package com.highloadinvest.gateway.infrastructure.clickhouse
 
 import com.highloadinvest.gateway.domain.entities.Candle
+import com.highloadinvest.gateway.domain.entities.CandleInterval
 import com.highloadinvest.gateway.domain.entities.Quote
 import com.highloadinvest.gateway.domain.repositories.QuoteRepository
 import com.highloadinvest.gateway.infrastructure.observability.GatewayMetrics
@@ -13,7 +14,6 @@ import io.opentelemetry.api.trace.Tracer
 import org.slf4j.LoggerFactory
 import java.net.HttpURLConnection
 import java.net.URI
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -63,14 +63,25 @@ class ClickHouseQuoteRepository(
         return conn.inputStream.bufferedReader().readText()
     }
 
-    override suspend fun getLatestQuotes(): List<Quote> = traced("getLatestQuotes", "SELECT ... FROM quotes LIMIT 1 BY ticker") {
+    override suspend fun getLatestQuotes(): List<Quote> = traced("getLatestQuotes", "SELECT ... with 24h change") {
         val start = System.currentTimeMillis()
-        logger.debug("getLatestQuotes()")
+        logger.debug("getLatestQuotes() with 24h change")
+        // Latest price per ticker LEFT JOIN price 24h ago — single round-trip
         val result = query("""
-            SELECT ticker, price, volume, timestamp
-            FROM quotes
-            ORDER BY timestamp DESC
-            LIMIT 1 BY ticker
+            SELECT
+                latest.ticker AS ticker,
+                latest.price AS price,
+                latest.volume AS volume,
+                latest.timestamp AS timestamp,
+                if(isNull(prev.price), 0, latest.price - prev.price) AS change24h,
+                if(isNull(prev.price) OR prev.price = 0, 0, (latest.price - prev.price) / prev.price * 100) AS changePercent24h
+            FROM
+                (SELECT ticker, price, volume, timestamp FROM quotes ORDER BY timestamp DESC LIMIT 1 BY ticker) AS latest
+            LEFT JOIN
+                (SELECT ticker, argMin(price, timestamp) AS price FROM quotes
+                 WHERE timestamp >= now() - INTERVAL 24 HOUR
+                 GROUP BY ticker) AS prev
+            ON latest.ticker = prev.ticker
             FORMAT JSONEachRow
         """.trimIndent())
         val quotes = parseQuotes(result)
@@ -80,33 +91,52 @@ class ClickHouseQuoteRepository(
 
     override suspend fun getQuoteByTicker(ticker: String): Quote? = traced("getQuoteByTicker", "SELECT ... WHERE ticker=?") {
         val start = System.currentTimeMillis()
-        val result = query("SELECT ticker, price, volume, timestamp FROM quotes WHERE ticker='$ticker' ORDER BY timestamp DESC LIMIT 1 FORMAT JSONEachRow")
+        val safe = ticker.replace("'", "")
+        val result = query("""
+            SELECT
+                latest.ticker AS ticker,
+                latest.price AS price,
+                latest.volume AS volume,
+                latest.timestamp AS timestamp,
+                if(isNull(prev.price), 0, latest.price - prev.price) AS change24h,
+                if(isNull(prev.price) OR prev.price = 0, 0, (latest.price - prev.price) / prev.price * 100) AS changePercent24h
+            FROM
+                (SELECT ticker, price, volume, timestamp FROM quotes WHERE ticker='$safe' ORDER BY timestamp DESC LIMIT 1) AS latest
+            LEFT JOIN
+                (SELECT ticker, argMin(price, timestamp) AS price FROM quotes
+                 WHERE ticker='$safe' AND timestamp >= now() - INTERVAL 24 HOUR
+                 GROUP BY ticker) AS prev
+            ON latest.ticker = prev.ticker
+            FORMAT JSONEachRow
+        """.trimIndent())
         val quotes = parseQuotes(result)
         logger.info("getQuoteByTicker({}) found={} in {}ms", ticker, quotes.isNotEmpty(), System.currentTimeMillis() - start)
         quotes.firstOrNull()
     }
 
-    override suspend fun getCandles(ticker: String, from: Long, to: Long): List<Candle> = traced("getCandles", "SELECT toStartOfMinute(...) GROUP BY ts") {
-        val start = System.currentTimeMillis()
-        val result = query("""
-            SELECT
-                '$ticker' as ticker,
-                toStartOfMinute(timestamp) as ts,
-                argMin(price, timestamp) as open,
-                max(price) as high,
-                min(price) as low,
-                argMax(price, timestamp) as close,
-                sum(volume) as volume
-            FROM quotes
-            WHERE ticker='$ticker' AND timestamp BETWEEN fromUnixTimestamp($from) AND fromUnixTimestamp($to)
-            GROUP BY ts
-            ORDER BY ts
-            FORMAT JSONEachRow
-        """.trimIndent())
-        val candles = parseCandles(result)
-        logger.info("getCandles({}) returned {} in {}ms", ticker, candles.size, System.currentTimeMillis() - start)
-        candles
-    }
+    override suspend fun getCandles(ticker: String, from: Long, to: Long, interval: CandleInterval): List<Candle> =
+        traced("getCandles", "toStartOfInterval($interval) GROUP BY ts") {
+            val start = System.currentTimeMillis()
+            val safe = ticker.replace("'", "")
+            val result = query("""
+                SELECT
+                    '$safe' as ticker,
+                    toStartOfInterval(timestamp, ${interval.clickhouseExpr}) as ts,
+                    argMin(price, timestamp) as open,
+                    max(price) as high,
+                    min(price) as low,
+                    argMax(price, timestamp) as close,
+                    sum(volume) as volume
+                FROM quotes
+                WHERE ticker='$safe' AND timestamp BETWEEN fromUnixTimestamp($from) AND fromUnixTimestamp($to)
+                GROUP BY ts
+                ORDER BY ts
+                FORMAT JSONEachRow
+            """.trimIndent())
+            val candles = parseCandles(result)
+            logger.info("getCandles({}, {}) returned {} in {}ms", ticker, interval.value, candles.size, System.currentTimeMillis() - start)
+            candles
+        }
 
     private fun parseQuotes(jsonEachRow: String): List<Quote> {
         if (jsonEachRow.isBlank()) return emptyList()
@@ -117,7 +147,9 @@ class ClickHouseQuoteRepository(
                     ticker = obj.getString("ticker"),
                     price = obj.getDouble("price"),
                     volume = obj.getLong("volume"),
-                    timestamp = LocalDateTime.parse(obj.getString("timestamp"), CH_TS).toInstant(ZoneOffset.UTC)
+                    timestamp = LocalDateTime.parse(obj.getString("timestamp"), CH_TS).toInstant(ZoneOffset.UTC),
+                    change24h = obj.optDouble("change24h", 0.0),
+                    changePercent24h = obj.optDouble("changePercent24h", 0.0)
                 )
             } catch (e: Exception) {
                 logger.warn("Failed to parse quote: {}", e.message)

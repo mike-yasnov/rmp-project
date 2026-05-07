@@ -11,6 +11,10 @@ import io.ktor.server.routing.*
 
 fun Route.bankingProxyRoutes(client: HttpClient, bankingUrl: String) {
     route("/api") {
+        post("/auth/login") {
+            call.forwardJson(client, HttpMethod.Post, "$bankingUrl/api/auth/login")
+        }
+
         post("/users") {
             call.forwardJson(client, HttpMethod.Post, "$bankingUrl/api/users")
         }
@@ -37,6 +41,30 @@ fun Route.bankingProxyRoutes(client: HttpClient, bankingUrl: String) {
         get("/portfolio/{userId}") {
             val userId = call.parameters["userId"] ?: throw IllegalArgumentException("User id is required")
             call.forwardJson(client, HttpMethod.Get, "$bankingUrl/api/portfolio/$userId")
+        }
+
+        post("/orders") {
+            call.forwardJson(client, HttpMethod.Post, "$bankingUrl/api/orders")
+        }
+
+        get("/orders/{userId}") {
+            val userId = call.parameters["userId"] ?: throw IllegalArgumentException("User id is required")
+            val status = call.request.queryParameters["status"]
+            val target = if (status.isNullOrBlank())
+                "$bankingUrl/api/orders/$userId"
+            else
+                "$bankingUrl/api/orders/$userId?status=$status"
+            call.forwardJson(client, HttpMethod.Get, target)
+        }
+
+        get("/orders/order/{orderId}") {
+            val orderId = call.parameters["orderId"] ?: throw IllegalArgumentException("Order id is required")
+            call.forwardJson(client, HttpMethod.Get, "$bankingUrl/api/orders/order/$orderId")
+        }
+
+        delete("/orders/{orderId}") {
+            val orderId = call.parameters["orderId"] ?: throw IllegalArgumentException("Order id is required")
+            call.forwardJson(client, HttpMethod.Delete, "$bankingUrl/api/orders/$orderId")
         }
     }
 }

@@ -4,11 +4,13 @@ import com.highloadinvest.gateway.application.usecases.GetCurrentQuotes
 import com.highloadinvest.gateway.infrastructure.clickhouse.ClickHouseQuoteRepository
 import com.highloadinvest.gateway.infrastructure.observability.GatewayMetrics
 import com.highloadinvest.gateway.infrastructure.observability.Telemetry
+import com.highloadinvest.gateway.infrastructure.redis.RedisOrderEventSubscriber
 import com.highloadinvest.gateway.infrastructure.redis.RedisQuoteSubscriber
 import com.highloadinvest.gateway.presentation.plugins.*
 import com.highloadinvest.gateway.presentation.routes.healthRoutes
 import com.highloadinvest.gateway.presentation.routes.bankingProxyRoutes
 import com.highloadinvest.gateway.presentation.routes.quoteRoutes
+import com.highloadinvest.gateway.presentation.websocket.OrderWebSocketHandler
 import com.highloadinvest.gateway.presentation.websocket.QuoteWebSocketHandler
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -16,7 +18,6 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import io.opentelemetry.instrumentation.ktor.v3_0.KtorServerTelemetry
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -41,6 +42,7 @@ fun Application.module() {
     val quoteRepo = ClickHouseQuoteRepository(clickhouseUrl, openTelemetry, metrics)
     val getCurrentQuotes = GetCurrentQuotes(quoteRepo)
     val wsHandler = QuoteWebSocketHandler(metrics)
+    val orderWsHandler = OrderWebSocketHandler()
     val bankingClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
@@ -55,10 +57,12 @@ fun Application.module() {
         wsHandler.broadcast(message)
     }
 
-    install(KtorServerTelemetry) {
-        setOpenTelemetry(openTelemetry)
-        capturedRequestHeaders("X-Request-Id", "User-Agent")
+    val orderSubscriber = RedisOrderEventSubscriber(redisHost, redisPort) { userId, message ->
+        orderWsHandler.deliver(userId, message)
     }
+    orderSubscriber.start()
+
+    // KtorServerTelemetry is installed automatically by the OpenTelemetry javaagent.
 
     configureSerialization()
     configureStatusPages()
@@ -71,12 +75,14 @@ fun Application.module() {
         quoteRoutes(getCurrentQuotes)
         bankingProxyRoutes(bankingClient, bankingUrl)
         with(wsHandler) { quoteWebSocket() }
+        with(orderWsHandler) { orderWebSocket() }
     }
 
     @Suppress("DEPRECATION")
     environment.monitor.subscribe(ApplicationStopped) {
-        logger.info("Shutting down — closing Redis subscriber")
+        logger.info("Shutting down — closing Redis subscribers")
         redisSubscriber.close()
+        orderSubscriber.close()
         bankingClient.close()
     }
 

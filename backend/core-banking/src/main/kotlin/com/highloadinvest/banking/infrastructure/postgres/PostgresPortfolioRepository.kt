@@ -33,6 +33,34 @@ class PostgresPortfolioRepository : PortfolioRepository {
         return items
     }
 
+    override suspend fun getLots(userId: UUID, ticker: String): Int {
+        DatabaseFactory.connection().use { conn ->
+            conn.prepareStatement("SELECT lots FROM portfolio WHERE user_id = ? AND ticker = ?").use { stmt ->
+                stmt.setObject(1, userId)
+                stmt.setString(2, ticker)
+                val rs = stmt.executeQuery()
+                val lots = if (rs.next()) rs.getInt("lots") else 0
+                conn.commit()
+                return lots
+            }
+        }
+    }
+
+    override suspend fun pendingSellLots(userId: UUID, ticker: String): Int {
+        DatabaseFactory.connection().use { conn ->
+            conn.prepareStatement(
+                "SELECT COALESCE(SUM(lots), 0) FROM limit_orders WHERE user_id = ? AND ticker = ? AND side = 'SELL' AND status = 'PENDING'"
+            ).use { stmt ->
+                stmt.setObject(1, userId)
+                stmt.setString(2, ticker)
+                val rs = stmt.executeQuery()
+                val lots = if (rs.next()) rs.getInt(1) else 0
+                conn.commit()
+                return lots
+            }
+        }
+    }
+
     override suspend fun updatePosition(userId: UUID, ticker: String, lotsDelta: Int, price: Double) {
         logger.info("updatePosition userId={} ticker={} lotsDelta={} price={}", userId, ticker, lotsDelta, price)
         DatabaseFactory.connection().use { conn ->

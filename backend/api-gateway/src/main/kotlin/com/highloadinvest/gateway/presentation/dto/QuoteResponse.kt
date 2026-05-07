@@ -7,7 +7,9 @@ data class QuoteResponse(
     val ticker: String,
     val price: Double,
     val volume: Long,
-    val timestamp: String
+    val timestamp: String,
+    val change24h: Double = 0.0,
+    val changePercent24h: Double = 0.0
 )
 
 @Serializable

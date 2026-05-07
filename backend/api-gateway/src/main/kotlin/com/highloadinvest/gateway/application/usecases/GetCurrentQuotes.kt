@@ -1,6 +1,7 @@
 package com.highloadinvest.gateway.application.usecases
 
 import com.highloadinvest.gateway.domain.entities.Candle
+import com.highloadinvest.gateway.domain.entities.CandleInterval
 import com.highloadinvest.gateway.domain.entities.Quote
 import com.highloadinvest.gateway.domain.repositories.QuoteRepository
 import org.slf4j.LoggerFactory
@@ -23,9 +24,9 @@ class GetCurrentQuotes(private val quoteRepository: QuoteRepository) {
         return quote
     }
 
-    suspend fun candles(ticker: String, from: Long, to: Long): List<Candle> {
-        logger.debug("GetCurrentQuotes.candles() ticker={} from={} to={}", ticker, from, to)
-        val candles = quoteRepository.getCandles(ticker, from, to)
+    suspend fun candles(ticker: String, from: Long, to: Long, interval: CandleInterval = CandleInterval.M1): List<Candle> {
+        logger.debug("GetCurrentQuotes.candles() ticker={} from={} to={} interval={}", ticker, from, to, interval.value)
+        val candles = quoteRepository.getCandles(ticker, from, to, interval)
         logger.debug("GetCurrentQuotes.candles() returned {} candles", candles.size)
         return candles
     }

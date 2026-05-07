@@ -6,6 +6,7 @@ val postgresVersion = "42.7.6"
 val hikariVersion = "6.3.0"
 val otelBomVersion = "1.46.0"
 val otelInstrumentationBomVersion = "2.11.0"
+val jedisVersion = "5.2.0"
 
 plugins {
     kotlin("jvm") version "2.1.20"
@@ -46,6 +47,9 @@ dependencies {
     // PostgreSQL
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
+
+    // Redis
+    implementation("redis.clients:jedis:$jedisVersion")
 
     // OpenTelemetry
     implementation("io.opentelemetry:opentelemetry-api")

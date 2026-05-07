@@ -101,4 +101,70 @@ class PostgresAccountRepository : AccountRepository {
         }
         return Account(id = id, userId = userId, balance = initialBalance)
     }
+
+    override suspend fun reservedBalance(userId: UUID): Double {
+        DatabaseFactory.connection().use { conn ->
+            conn.prepareStatement("SELECT COALESCE(reserved_balance, 0) FROM accounts WHERE user_id = ?")
+                .use { stmt ->
+                    stmt.setObject(1, userId)
+                    val rs = stmt.executeQuery()
+                    val value = if (rs.next()) rs.getDouble(1) else 0.0
+                    conn.commit()
+                    return value
+                }
+        }
+    }
+
+    override suspend fun reserveFunds(userId: UUID, amount: Double) {
+        require(amount > 0) { "Reserve amount must be positive" }
+        DatabaseFactory.connection().use { conn ->
+            try {
+                conn.prepareStatement(
+                    """
+                    UPDATE accounts
+                    SET balance = balance - ?, reserved_balance = COALESCE(reserved_balance, 0) + ?
+                    WHERE user_id = ? AND balance >= ?
+                    """.trimIndent()
+                ).use { stmt ->
+                    stmt.setDouble(1, amount)
+                    stmt.setDouble(2, amount)
+                    stmt.setObject(3, userId)
+                    stmt.setDouble(4, amount)
+                    val rows = stmt.executeUpdate()
+                    if (rows == 0) {
+                        conn.rollback()
+                        throw IllegalArgumentException("Insufficient funds to reserve $amount")
+                    }
+                }
+                conn.commit()
+            } catch (e: Throwable) {
+                conn.rollback()
+                throw e
+            }
+        }
+    }
+
+    override suspend fun releaseReservation(userId: UUID, amount: Double) {
+        if (amount <= 0) return
+        DatabaseFactory.connection().use { conn ->
+            try {
+                conn.prepareStatement(
+                    """
+                    UPDATE accounts
+                    SET balance = balance + ?, reserved_balance = GREATEST(COALESCE(reserved_balance, 0) - ?, 0)
+                    WHERE user_id = ?
+                    """.trimIndent()
+                ).use { stmt ->
+                    stmt.setDouble(1, amount)
+                    stmt.setDouble(2, amount)
+                    stmt.setObject(3, userId)
+                    stmt.executeUpdate()
+                }
+                conn.commit()
+            } catch (e: Throwable) {
+                conn.rollback()
+                throw e
+            }
+        }
+    }
 }

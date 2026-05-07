@@ -35,3 +35,23 @@ data class PortfolioItem(
     val lots: Int,
     val avgPrice: Double
 )
+
+enum class OrderSide { BUY, SELL }
+
+enum class OrderStatus { PENDING, FILLED, CANCELLED, INSUFFICIENT_FUNDS, INSUFFICIENT_LOTS }
+
+data class LimitOrder(
+    val id: UUID,
+    val userId: UUID,
+    val ticker: String,
+    val side: OrderSide,
+    val lots: Int,
+    val limitPrice: Double,
+    val status: OrderStatus,
+    val reservedAmount: Double,
+    val createdAt: Instant,
+    val filledAt: Instant? = null,
+    val cancelledAt: Instant? = null,
+    val fillTradeId: UUID? = null,
+    val fillPrice: Double? = null
+)
