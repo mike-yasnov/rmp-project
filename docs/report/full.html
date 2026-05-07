@@ -1,2377 +1,1303 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru">
+<!doctype html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="author" content="Команда HighLoad Invest, ИТМО" />
-  <title>Программно-аппаратный комплекс «HighLoad Invest Ecosystem»</title>
-  <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { color: #008000; } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { color: #008000; font-weight: bold; } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Программно-аппаратный комплекс имитации биржевых торгов «HighLoad Invest Ecosystem»</title>
+<style>
+@page {
+  size: A4;
+  margin: 20mm 10mm 20mm 30mm;
+
+  @bottom-center {
+    content: counter(page);
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+  }
+}
+
+@page:first {
+  @bottom-center {
+    content: "";
+  }
+}
+
+html {
+  background: #ffffff;
+  color: #000000;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  color: #000000;
+  background: #ffffff;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14pt;
+  line-height: 1.5;
+  text-align: justify;
+  hyphens: none;
+  overflow-wrap: break-word;
+}
+
+#title-block-header {
+  min-height: 250mm;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+#title-block-header .title-top {
+  font-size: 14pt;
+  line-height: 1.35;
+}
+
+#title-block-header .title-main {
+  margin-top: 22mm;
+}
+
+#title-block-header .title-main p,
+#title-block-header .title-top p {
+  margin: 0;
+  text-indent: 0;
+  text-align: center;
+}
+
+#title-block-header .report-type {
+  font-size: 16pt;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+#title-block-header .course {
+  margin-top: 3mm;
+  font-size: 14pt;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+#title-block-header .project-title {
+  margin-top: 14mm;
+  font-size: 16pt;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+#title-block-header .project-subtitle {
+  margin-top: 4mm;
+  font-size: 14pt;
+  line-height: 1.5;
+}
+
+#title-block-header .title-people {
+  margin-top: 24mm;
+  margin-left: auto;
+  width: 118mm;
+  text-align: right;
+}
+
+#title-block-header .title-people table {
+  width: auto;
+  margin: 0 0 0 auto;
+  border-collapse: collapse;
+  font-size: 14pt;
+  line-height: 1.5;
+}
+
+#title-block-header .title-people td {
+  border: 0;
+  padding: 0 0 1.5mm 4mm;
+  vertical-align: top;
+  text-align: left;
+}
+
+#title-block-header .date {
+  margin-top: auto;
+  font-size: 14pt;
+  line-height: 1.5;
+  text-align: center;
+  text-indent: 0;
+}
+
+.title-page {
+  min-height: 250mm;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+#TOC {
+  page-break-after: always;
+}
+
+#TOC::before {
+  content: "СОДЕРЖАНИЕ";
+  display: block;
+  margin: 0 0 8mm 0;
+  font-size: 16pt;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+
+#TOC h1,
+#TOC h2,
+#TOC h3,
+#TOC h4 {
+  text-align: center;
+}
+
+#TOC .toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+  margin: 0 0 2mm 0;
+  line-height: 1.35;
+  text-align: left;
+  page-break-inside: avoid;
+  color: #000000;
+  text-decoration: none;
+}
+
+#TOC .toc-level-1 {
+  margin-top: 2.5mm;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#TOC .toc-level-1:first-child {
+  margin-top: 0;
+}
+
+#TOC .toc-level-2 {
+  padding-left: 7mm;
+  font-weight: 400;
+}
+
+#TOC .toc-level-3 {
+  padding-left: 14mm;
+  font-weight: 400;
+}
+
+#TOC .toc-title {
+  flex: 0 0 auto;
+  max-width: none;
+  white-space: nowrap;
+}
+
+#TOC .toc-dots {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #000000;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+#TOC .toc-dots::before {
+  content: "................................................................................................................................................................................................";
+}
+
+#TOC .toc-page {
+  flex: 0 0 9mm;
+  text-align: right;
+}
+
+
+a,
+a:visited {
+  color: #000000;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #000000;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 700;
+  line-height: 1.5;
+  page-break-after: avoid;
+  text-align: left;
+}
+
+h1 {
+  margin: 0 0 8mm 0;
+  padding-top: 0;
+  font-size: 16pt;
+  text-align: center;
+  text-transform: uppercase;
+  page-break-before: always;
+}
+
+#введение {
+  page-break-before: always;
+}
+
+h2 {
+  margin: 8mm 0 4mm 0;
+  font-size: 14pt;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  margin: 6mm 0 3mm 0;
+  font-size: 14pt;
+}
+
+p {
+  margin: 0 0 2mm 0;
+  text-indent: 12.5mm;
+}
+
+blockquote {
+  margin: 0 0 3mm 0;
+  padding: 0;
+  border: 0;
+  color: #000000;
+}
+
+blockquote p {
+  text-indent: 0;
+}
+
+ul,
+ol {
+  margin: 0 0 3mm 0;
+  padding-left: 12.5mm;
+}
+
+li {
+  margin: 0 0 1.5mm 0;
+  text-align: justify;
+}
+
+li > p {
+  text-indent: 0;
+}
+
+table {
+  width: 100%;
+  margin: 4mm 0 6mm 0;
+  border-collapse: collapse;
+  page-break-inside: auto;
+  font-size: 12pt;
+  line-height: 1.25;
+}
+
+tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+thead,
+tbody {
+  border: 0;
+}
+
+th,
+td {
+  border: 1px solid #000000;
+  padding: 1.5mm 2mm;
+  vertical-align: top;
+  text-align: left;
+}
+
+th {
+  font-weight: 700;
+  text-align: center;
+}
+
+th:first-child,
+td:first-child {
+  width: 18mm;
+  min-width: 18mm;
+  white-space: nowrap;
+  text-align: center;
+}
+
+figure {
+  margin: 4mm 0 6mm 0;
+  page-break-inside: avoid;
+  text-align: center;
+}
+
+figure p {
+  text-indent: 0;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+pre,
+code {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10pt;
+  line-height: 1.2;
+}
+
+pre {
+  margin: 3mm 0 5mm 0;
+  padding: 2mm;
+  border: 1px solid #000000;
+  white-space: pre-wrap;
+  page-break-inside: avoid;
+}
+
+code {
+  hyphens: manual;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #000000;
+}
+
+@media screen {
+  body {
+    width: 170mm;
+    margin: 0 auto;
+    padding: 20mm 10mm 20mm 30mm;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+figure{break-inside:avoid;text-align:center;margin:1.2rem 0;}
+figure img{max-width:100%;height:auto;}
+figcaption{font-size:.95em;margin-top:.35rem;text-align:center;text-indent:0;}
+#title-block-header p{text-indent:0;}
+</style>
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Программно-аппаратный комплекс «HighLoad Invest
-Ecosystem»</h1>
-<p class="subtitle">Отчёт о выполнении лабораторной работы по курсу
-«Разработка мобильных приложений»</p>
-<p class="author">Команда HighLoad Invest, ИТМО</p>
-<p class="date">Санкт-Петербург, 2026</p>
+<div class="title-top">
+<p>Университет ИТМО</p>
+<p>Факультет программной инженерии и компьютерной техники</p>
+</div>
+<div class="title-main">
+<p class="report-type">Отчёт по групповому проекту</p>
+<p class="course">по курсу «Разработка мобильных приложений»</p>
+<p class="project-title">HighLoad Invest Ecosystem</p>
+<p class="project-subtitle">Программно-аппаратный комплекс имитации биржевых торгов</p>
+</div>
+<div class="title-people">
+<table>
+<tbody>
+<tr><td>Студенты:</td><td>Ильин Никита Сергеевич<br>Алхимовици Арсений<br>Яснов Михаил Андреевич<br>Плешивцев Кирилл Михайлович<br>Соколов Александр Павлович<br>Ильин Александр Алексеевич<br>Вердиев Фада Ильхам оглы<br>Киселев Михаил Васильевич</td></tr>
+<tr><td>Преподаватель:</td><td>Ключев А. О.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="date">Санкт-Петербург<br>2026</p>
 </header>
-<nav id="TOC" role="doc-toc">
+<nav id="TOC"><a class="toc-row toc-level-1" href="#sec-1">
+<span class="toc-title">ВВЕДЕНИЕ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">4</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-2">
+<span class="toc-title">Цели работы</span>
+<span class="toc-dots"></span>
+<span class="toc-page">4</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-3">
+<span class="toc-title">Задачи</span>
+<span class="toc-dots"></span>
+<span class="toc-page">4</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-4">
+<span class="toc-title">ТЕХНИЧЕСКОЕ ЗАДАНИЕ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">5</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-5">
+<span class="toc-title">Назначение системы</span>
+<span class="toc-dots"></span>
+<span class="toc-page">5</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-6">
+<span class="toc-title">Состав системы</span>
+<span class="toc-dots"></span>
+<span class="toc-page">5</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-7">
+<span class="toc-title">Технологические требования</span>
+<span class="toc-dots"></span>
+<span class="toc-page">5</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-8">
+<span class="toc-title">Функциональные требования</span>
+<span class="toc-dots"></span>
+<span class="toc-page">6</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-9">
+<span class="toc-title">Нефункциональные требования</span>
+<span class="toc-dots"></span>
+<span class="toc-page">8</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-10">
+<span class="toc-title">ОПИСАНИЕ АРХИТЕКТУРЫ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">10</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-11">
+<span class="toc-title">Архитектурная идея</span>
+<span class="toc-dots"></span>
+<span class="toc-page">10</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-12">
+<span class="toc-title">Архитектура в модели C4</span>
+<span class="toc-dots"></span>
+<span class="toc-page">10</span>
+</a>
+<a class="toc-row toc-level-3" href="#sec-13">
+<span class="toc-title">Уровень 1. System Context</span>
+<span class="toc-dots"></span>
+<span class="toc-page">10</span>
+</a>
+<a class="toc-row toc-level-3" href="#sec-14">
+<span class="toc-title">Уровень 2. Container</span>
+<span class="toc-dots"></span>
+<span class="toc-page">11</span>
+</a>
+<a class="toc-row toc-level-3" href="#sec-15">
+<span class="toc-title">Уровень 3. Component</span>
+<span class="toc-dots"></span>
+<span class="toc-page">12</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-16">
+<span class="toc-title">Основные потоки данных</span>
+<span class="toc-dots"></span>
+<span class="toc-page">17</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-17">
+<span class="toc-title">Хранилища данных</span>
+<span class="toc-dots"></span>
+<span class="toc-page">18</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-18">
+<span class="toc-title">Архитектурные ограничения</span>
+<span class="toc-dots"></span>
+<span class="toc-page">18</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-19">
+<span class="toc-title">ОПИСАНИЕ РЕАЛИЗАЦИИ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">19</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-20">
+<span class="toc-title">Backend</span>
+<span class="toc-dots"></span>
+<span class="toc-page">19</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-21">
+<span class="toc-title">Получение котировок</span>
+<span class="toc-dots"></span>
+<span class="toc-page">19</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-22">
+<span class="toc-title">Мобильные приложения</span>
+<span class="toc-dots"></span>
+<span class="toc-page">20</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-23">
+<span class="toc-title">Развёртывание</span>
+<span class="toc-dots"></span>
+<span class="toc-page">20</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-24">
+<span class="toc-title">Наблюдаемость</span>
+<span class="toc-dots"></span>
+<span class="toc-page">20</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-25">
+<span class="toc-title">ОПИСАНИЕ СИСТЕМЫ ТЕСТИРОВАНИЯ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">25</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-26">
+<span class="toc-title">Проверяемые сценарии</span>
+<span class="toc-dots"></span>
+<span class="toc-page">25</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-27">
+<span class="toc-title">Smoke-тестирование</span>
+<span class="toc-dots"></span>
+<span class="toc-page">25</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-28">
+<span class="toc-title">Проверка котировок</span>
+<span class="toc-dots"></span>
+<span class="toc-page">25</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-29">
+<span class="toc-title">Нагрузочное тестирование</span>
+<span class="toc-dots"></span>
+<span class="toc-page">26</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-30">
+<span class="toc-title">Тестовое инструментальное обеспечение</span>
+<span class="toc-dots"></span>
+<span class="toc-page">27</span>
+</a>
+<a class="toc-row toc-level-2" href="#sec-31">
+<span class="toc-title">Проверка сборки мобильных приложений</span>
+<span class="toc-dots"></span>
+<span class="toc-page">28</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-32">
+<span class="toc-title">ЗАКЛЮЧЕНИЕ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">29</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-33">
+<span class="toc-title">СПИСОК ЛИТЕРАТУРЫ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">30</span>
+</a>
+<a class="toc-row toc-level-1" href="#sec-34">
+<span class="toc-title">ПРИЛОЖЕНИЕ А. ЭССЕ</span>
+<span class="toc-dots"></span>
+<span class="toc-page">31</span>
+</a></nav>
+<h1 id="sec-1">Введение</h1>
+<p>Курсовая работа посвящена разработке учебной экосистемы брокерского приложения:
+Android-клиенты получают котировки, пользователь может открыть учебный счёт,
+пополнить его условными средствами и выполнять операции покупки и продажи активов.
+Система реализована как набор сервисов, разворачиваемых через Docker Compose.</p>
+<h2 id="sec-2">Цели работы</h2>
+<p>Цель работы — спроектировать и реализовать минимально жизнеспособную экосистему
+для имитации трейдинга и инвестиций, соответствующую стеку технологий из
+практического задания по курсу «Разработка мобильных приложений».</p>
+<h2 id="sec-3">Задачи</h2>
 <ul>
-<li><a href="#введение" id="toc-введение">Введение</a>
-<ul>
-<li><a href="#актуальность" id="toc-актуальность">Актуальность</a></li>
-<li><a href="#цели-работы" id="toc-цели-работы">Цели работы</a></li>
-<li><a href="#задачи" id="toc-задачи">Задачи</a></li>
-<li><a href="#обоснование-выбора-архитектуры"
-id="toc-обоснование-выбора-архитектуры">1. Обоснование выбора
-архитектуры</a></li>
-<li><a href="#общая-схема-системы" id="toc-общая-схема-системы">2. Общая
-схема системы</a></li>
-<li><a href="#коммуникация-между-сервисами"
-id="toc-коммуникация-между-сервисами">3. Коммуникация между
-сервисами</a></li>
-<li><a href="#таблица-коммуникаций" id="toc-таблица-коммуникаций">4.
-Таблица коммуникаций</a></li>
-<li><a href="#data-patterns-database-per-service"
-id="toc-data-patterns-database-per-service">5. Data Patterns —
-Database-per-Service</a></li>
-<li><a href="#clean-architecture-внутри-kotlin-сервисов"
-id="toc-clean-architecture-внутри-kotlin-сервисов">6. Clean Architecture
-внутри Kotlin-сервисов</a>
-<ul>
-<li><a href="#структура-каталогов"
-id="toc-структура-каталогов">Структура каталогов</a></li>
-</ul></li>
-<li><a href="#ключевые-архитектурные-решения-adr"
-id="toc-ключевые-архитектурные-решения-adr">7. Ключевые архитектурные
-решения (ADR)</a>
-<ul>
-<li><a href="#adr-001-clickhouse-как-источник-правды-для-котировок"
-id="toc-adr-001-clickhouse-как-источник-правды-для-котировок">ADR-001:
-ClickHouse как источник правды для котировок</a></li>
-<li><a href="#adr-002-батчинг-в-go-ingestion-сервисе"
-id="toc-adr-002-батчинг-в-go-ingestion-сервисе">ADR-002: Батчинг в Go
-Ingestion-сервисе</a></li>
-<li><a href="#adr-003-redis-pubsub-для-push-уведомлений"
-id="toc-adr-003-redis-pubsub-для-push-уведомлений">ADR-003: Redis PubSub
-для push-уведомлений</a></li>
-<li><a href="#adr-004-postgresql-с-голым-sql-без-orm"
-id="toc-adr-004-postgresql-с-голым-sql-без-orm">ADR-004: PostgreSQL с
-голым SQL (без ORM)</a></li>
-<li><a href="#adr-005-manual-di-вместо-koin"
-id="toc-adr-005-manual-di-вместо-koin">ADR-005: Manual DI вместо
-Koin</a></li>
-<li><a href="#adr-006-opentelemetry-с-otlp-grpc-и-self-hosted-backend"
-id="toc-adr-006-opentelemetry-с-otlp-grpc-и-self-hosted-backend">ADR-006:
-OpenTelemetry с OTLP gRPC и self-hosted backend</a></li>
-</ul></li>
-<li><a href="#схема-развёртывания" id="toc-схема-развёртывания">8. Схема
-развёртывания</a></li>
-<li><a href="#нефункциональные-требования-и-архитектурные-ответы"
-id="toc-нефункциональные-требования-и-архитектурные-ответы">9.
-Нефункциональные требования и архитектурные ответы</a></li>
-<li><a href="#observability-детальный-поток-данных"
-id="toc-observability-детальный-поток-данных">10. Observability —
-детальный поток данных</a>
-<ul>
-<li><a href="#что-инструментировано" id="toc-что-инструментировано">Что
-инструментировано</a></li>
-<li><a href="#trace-propagation" id="toc-trace-propagation">Trace
-propagation</a></li>
-</ul></li>
-<li><a href="#общие-принципы" id="toc-общие-принципы">1. Общие
-принципы</a>
-<ul>
-<li><a href="#внедрение-зависимостей"
-id="toc-внедрение-зависимостей">Внедрение зависимостей</a></li>
-<li><a href="#логирование" id="toc-логирование">Логирование</a></li>
-</ul></li>
-<li><a href="#api-gateway-kotlin-ktor"
-id="toc-api-gateway-kotlin-ktor">2. api-gateway (Kotlin / Ktor)</a>
-<ul>
-<li><a href="#назначение" id="toc-назначение">Назначение</a></li>
-<li><a href="#точка-входа" id="toc-точка-входа">Точка входа</a></li>
-<li><a href="#clickhouse-репозиторий"
-id="toc-clickhouse-репозиторий">ClickHouse-репозиторий</a></li>
-<li><a href="#redis-pubsub-websocket-fan-out"
-id="toc-redis-pubsub-websocket-fan-out">Redis pubsub → WebSocket
-fan-out</a></li>
-</ul></li>
-<li><a href="#core-banking-kotlin-ktor-postgresql"
-id="toc-core-banking-kotlin-ktor-postgresql">3. core-banking (Kotlin /
-Ktor / PostgreSQL)</a>
-<ul>
-<li><a href="#назначение-1" id="toc-назначение-1">Назначение</a></li>
-<li><a href="#подключение-к-бд" id="toc-подключение-к-бд">Подключение к
-БД</a></li>
-<li><a href="#postgrestradeexecutor"
-id="toc-postgrestradeexecutor">PostgresTradeExecutor</a></li>
-<li><a href="#маршруты-ktor" id="toc-маршруты-ktor">Маршруты
-Ktor</a></li>
-</ul></li>
-<li><a href="#go-ingestion-go" id="toc-go-ingestion-go">4. go-ingestion
-(Go)</a>
-<ul>
-<li><a href="#назначение-2" id="toc-назначение-2">Назначение</a></li>
-<li><a href="#точка-входа-1" id="toc-точка-входа-1">Точка входа</a></li>
-<li><a href="#чтение-драйвера" id="toc-чтение-драйвера">Чтение
-драйвера</a></li>
-<li><a href="#запись-в-clickhouse" id="toc-запись-в-clickhouse">Запись в
-ClickHouse</a></li>
-<li><a href="#публикация-в-redis" id="toc-публикация-в-redis">Публикация
-в Redis</a></li>
-</ul></li>
-<li><a href="#quote-generator-и-load-tester-учебные"
-id="toc-quote-generator-и-load-tester-учебные">5. quote-generator и
-load-tester (учебные)</a></li>
-<li><a href="#observability-в-коде" id="toc-observability-в-коде">6.
-Observability в коде</a></li>
-<li><a href="#unit-тесты" id="toc-unit-тесты">1. Unit-тесты</a></li>
-<li><a href="#integration-тесты-bruno-manual-cli"
-id="toc-integration-тесты-bruno-manual-cli">2. Integration-тесты Bruno
-(manual + CLI)</a></li>
-<li><a href="#end-to-end-сценарии" id="toc-end-to-end-сценарии">3.
-End-to-end сценарии</a>
-<ul>
-<li><a href="#smoke" id="toc-smoke">Smoke</a></li>
-<li><a href="#driver-клиент-после-phase-3"
-id="toc-driver-клиент-после-phase-3">Driver → клиент (после Phase
-3)</a></li>
-</ul></li>
-<li><a href="#нагрузочное-тестирование-nfr-002"
-id="toc-нагрузочное-тестирование-nfr-002">4. Нагрузочное тестирование
-(NFR-002)</a>
-<ul>
-<li><a href="#инструмент" id="toc-инструмент">Инструмент</a></li>
-<li><a href="#лестница-прогонов" id="toc-лестница-прогонов">Лестница
-прогонов</a></li>
-<li><a href="#ресурсы-под-10k-нагрузкой"
-id="toc-ресурсы-под-10k-нагрузкой">Ресурсы под 10K-нагрузкой</a></li>
-<li><a href="#узкие-места-и-наблюдения"
-id="toc-узкие-места-и-наблюдения">Узкие места и наблюдения</a></li>
-<li><a href="#соответствие-nfr-002"
-id="toc-соответствие-nfr-002">Соответствие NFR-002</a></li>
-<li><a href="#скриншоты" id="toc-скриншоты">Скриншоты</a></li>
-</ul></li>
-<li><a href="#observability-что-мы-можем-увидеть"
-id="toc-observability-что-мы-можем-увидеть">5. Observability — что мы
-можем увидеть</a></li>
-<li><a href="#краткая-сводка-по-критериям"
-id="toc-краткая-сводка-по-критериям">1. Краткая сводка по
-критериям</a></li>
-<li><a href="#реализация-ключевых-функций"
-id="toc-реализация-ключевых-функций">2. Реализация ключевых функций</a>
-<ul>
-<li><a href="#restwebsocket-api"
-id="toc-restwebsocket-api">REST/WebSocket API</a></li>
-<li><a href="#управление-состоянием"
-id="toc-управление-состоянием">Управление состоянием</a></li>
-<li><a href="#ui-слой" id="toc-ui-слой">UI-слой</a></li>
-</ul></li>
-<li><a href="#сложность-реализации-lines-of-code"
-id="toc-сложность-реализации-lines-of-code">3. Сложность реализации
-(Lines of Code)</a></li>
-<li><a href="#backend-готовность" id="toc-backend-готовность">4.
-Backend-готовность</a></li>
-<li><a href="#сборка-и-запуск" id="toc-сборка-и-запуск">5. Сборка и
-запуск</a>
-<ul>
-<li><a href="#native" id="toc-native">Native</a></li>
-<li><a href="#react-native" id="toc-react-native">React Native</a></li>
-</ul></li>
-<li><a href="#выводы" id="toc-выводы">6. Выводы</a></li>
-<li><a href="#запуск-в-эмуляторе-для-команды-mobile"
-id="toc-запуск-в-эмуляторе-для-команды-mobile">7. Запуск в эмуляторе
-(для команды mobile)</a></li>
-<li><a href="#достигнутые-результаты"
-id="toc-достигнутые-результаты">Достигнутые результаты</a></li>
-<li><a href="#выявленные-ограничения-и-направления-развития"
-id="toc-выявленные-ограничения-и-направления-развития">Выявленные
-ограничения и направления развития</a></li>
-<li><a href="#итог" id="toc-итог">Итог</a></li>
-</ul></li>
+<li>сформулировать техническое задание на систему;</li>
+<li>описать архитектуру и распределение ответственности между компонентами;</li>
+<li>реализовать backend, сбор котировок, драйвер Linux и два Android-клиента;</li>
+<li>подготовить тестовый стенд и проверить основные пользовательские сценарии;</li>
+<li>оформить отчёт в формате PDF с оглавлением, заключением и списком литературы.</li>
 </ul>
-</nav>
-<h1 id="введение">Введение</h1>
-<h2 id="актуальность">Актуальность</h2>
-<p>Современная финансовая индустрия требует от инженерных команд умения
-проектировать <strong>высоконагруженные распределённые системы</strong>,
-где данные перетекают от низкоуровневых источников (датчики, сетевые
-протоколы, аппаратные интерфейсы) до клиентских мобильных приложений за
-единицы и десятки миллисекунд. На рынке сегодня нельзя нанять инженера
-«просто на одном языке» — нужны команды, владеющие сразу C/Linux kernel,
-Go, Kotlin/JVM, React Native, базами данных разной природы (OLTP и
-OLAP), брокерами сообщений и средствами наблюдаемости.</p>
-<p>Курсовой проект «HighLoad Invest» воспроизводит уменьшенную, но
-архитектурно полноценную модель такой системы и позволяет команде из 10
-человек пройти весь жизненный цикл — от kernel-driver до Compose-UI — с
-готовым CI-стендом и нагрузочным тестированием.</p>
-<h2 id="цели-работы">Цели работы</h2>
-<ol type="1">
-<li><strong>Разработать backend-платформу</strong> торгового брокера,
-способную принимать поток синтетических котировок от kernel-модуля
-Linux, складывать их в аналитическое хранилище ClickHouse и обслуживать
-REST + WebSocket-запросы мобильных клиентов.</li>
-<li><strong>Подтвердить нефункциональные требования</strong> ТЗ: latency
-обновления цены менее 1 с (NFR-001) и стабильную работу при 10 000
-клиентских сессий (NFR-002).</li>
-<li><strong>Сравнить трудозатраты</strong> реализации одинакового по
-функциональности мобильного клиента на Kotlin + Jetpack Compose и React
-Native + Expo (DOC-002).</li>
-<li><strong>Подключить полноценную observability</strong> (OpenTelemetry
-→ Jaeger + Prometheus + Grafana) во все backend-сервисы и
-продемонстрировать сквозной трейсинг (FR-OBS-01/02).</li>
+<h1 id="sec-4">Техническое задание</h1>
+<h2 id="sec-5">Назначение системы</h2>
+<p>Разрабатываемая система предназначена для учебной имитации брокерской экосистемы.
+Она получает поток котировок, сохраняет историю цен, отдаёт данные мобильным
+клиентам и выполняет учебные торговые операции без реальных банковских
+транзакций.</p>
+<h2 id="sec-6">Состав системы</h2>
+<p>В соответствии с практическим заданием система включает следующие компоненты:</p>
+<ol>
+<li>Мобильное приложение Android на Kotlin и Jetpack Compose.</li>
+<li>Кросс-платформенное мобильное приложение на React Native.</li>
+<li>API-сервис для связи с мобильными приложениями на Kotlin/Ktor.</li>
+<li>Сервис пользовательских данных и торговых операций на Kotlin.</li>
+<li>Сервис имитации 10 000 мобильных клиентов для нагрузочного тестирования.</li>
+<li>Сервис получения котировок на Go.</li>
+<li>Драйвер Linux на C, имитирующий поток биржевых котировок.</li>
 </ol>
-<h2 id="задачи">Задачи</h2>
-<ul>
-<li>Спроектировать микросервисную архитектуру с разделением
-ответственности по языкам: C для kernel space, Go для bulk-ingestion,
-Kotlin для бизнес-логики и API.</li>
-<li>Реализовать драйвер <code>quotes_driver.ko</code>, выдающий поток
-котировок через <code>/dev/quotes</code>.</li>
-<li>Реализовать Go-сервис <code>go-ingestion</code>: чтение драйвера,
-батч-вставка в ClickHouse, публикация в Redis Pub/Sub.</li>
-<li>Реализовать Kotlin/Ktor сервисы <code>api-gateway</code> и
-<code>core-banking</code> со строгими ACID-транзакциями для финансовых
-операций (PostgreSQL).</li>
-<li>Развернуть весь стек на Linux-сервере, включая otel-collector,
-Jaeger, Prometheus и Grafana с auto-provisioned дашбордом.</li>
-<li>Провести нагрузочный тест уровней 1 K → 5 K → 10 K ботов и
-подтвердить NFR-002.</li>
-<li>Описать систему по разделам ТЗ, реализации, тестирования и
-подготовить отчёт DOC-002. ТЕХНИЧЕСКОЕ ЗАДАНИЕ (ТЗ) На создание
-программно-аппаратного комплекса имитации биржевых торгов Проект:
-«HighLoad Invest Ecosystem» Версия документа: 3.0
-(ClickHouse-centric)</li>
-</ul>
-<ol type="1">
-<li>ОБЩИЕ СВЕДЕНИЯ 1.1. Назначение системы Разработка учебной
-экосистемы, имитирующей работу биржевой платформы. Система обеспечивает
-генерацию котировок, их потоковую загрузку в аналитическое хранилище и
-предоставление доступа к торгам через два вида клиентских
-терминалов.</li>
-</ol>
-<p>1.2. Цели проекта Архитектурная: Реализация паттерна работы с
-большими данными, где “источником правды” выступает колоночная СУБД
-(ClickHouse), а не оперативный кэш. Сравнительная: Анализ трудозатрат и
-производительности при разработке двух идентичных клиентов: нативного
-(Kotlin/Compose) и кросс-платформенного (React Native). Образовательная:
-Изучение полного цикла доставки данных от ядра ОС (Driver) до конечного
-пользователя с учетом задержек на запись/чтение дисковой БД. 1.3. Состав
-комплекса Комплекс состоит из следующих подсистем:</p>
-<p>Модуль генерации данных: Источник биржевых данных (Драйвер
-устройства). Модуль сбора данных (Ingestion): Сервис перекладки данных
-из драйвера в БД. Бэкенд-платформа: Сервисы API Gateway и Core Banking.
-Клиентский контур (Frontend): Терминал А: Нативное мобильное приложение
-(Android). Терминал Б: Кросс-платформенное мобильное приложение. Модуль
-нагрузочного тестирования: Имитатор активности пользователей. Подсистема
-телеметрии и мониторинга: Сбор метрик и трейсов со всех компонентов
-системы. 2. ТРЕБОВАНИЯ К ТЕХНОЛОГИЧЕСКОМУ СТЕКУ (ОГРАНИЧЕНИЯ) TR-001
-(Генерация данных): Язык C, уровень ядра Linux (Kernel Space). TR-002
-(Сбор данных): Язык Go. TR-003 (Бэкенд и API): Язык Kotlin, фреймворк
-Ktor. TR-004 (Клиентские терминалы): Клиент А: Android Native (Kotlin +
-Jetpack Compose). Клиент Б: Cross-platform (React Native / Flutter).
-TR-005 (Хранение данных): Котировки и история: ClickHouse.
-Пользовательские данные: PostgreSQL. TR-006 (Observability):
-OpenTelemetry. 3. ФУНКЦИОНАЛЬНЫЕ ТРЕБОВАНИЯ (FR) 3.1. Подсистема
-источников и обработки данных FR-SYS-01 (Генерация): Драйвер должен
-генерировать поток котировок. FR-SYS-02 (Загрузка в БД): Сервис
-Ingestion должен накапливать данные в буфер (батчинг) и эффективно
-вставлять их в ClickHouse. FR-SYS-03 (Источник данных для API): Все
-запросы на получение текущей цены и истории должны обслуживаться
-выборками из ClickHouse. 3.2. Подсистема Бэкенда FR-API-01 (Единый API):
-Поддержка идентичного API для обоих мобильных клиентов. FR-API-02
-(Трансляция данных): Бэкенд должен периодически опрашивать ClickHouse и
-отдавать клиентам “свежие” данные посредством WebSocket. FR-API-03
-(Исполнение сделок): Обработка запросов на покупку/продажу. Валидация
-баланса в PostgreSQL. 3.3. Требования к Клиентским терминалам (Mobile
-Apps) Требования идентичны для Native и Cross-platform клиентов.</p>
-<p>FR-APP-01 (Дашборд): Отображение текущих котировок, полученных от
-бэкенда. FR-APP-02 (Графики): Отрисовка свечных графиков на основе
-данных из ClickHouse. FR-APP-03 (Торговля лотами): Интерфейс подачи
-заявок должен оперировать понятием “Лот”. Пользователь вводит целое
-число лотов (например, 1, 10, 50). Система рассчитывает итоговую сумму
-сделки (Цена × Кол-во лотов). FR-APP-04 (Портфель): Отображение баланса
-и купленных лотов по каждому тикеру. 3.4. Подсистема Телеметрии
-FR-OBS-01 (Сбор метрик): Все сервисы (Go, Kotlin) должны отправлять
-метрики (RPS, Error Rate, Latency) в коллектор. FR-OBS-02 (Трейсинг):
-Сквозной трейсинг запросов от API Gateway до базы данных. 4.
-НЕФУНКЦИОНАЛЬНЫЕ ТРЕБОВАНИЯ (NFR) 4.1. Производительность (Performance)
-NFR-001 (Latency): Задержка обновления цены на клиентском терминале
-относительно времени генерации не должна превышать 1 секунду (1000 мс).
-Обоснование: Учитывается время на накопление батча в Go-сервисе, вставку
-в ClickHouse (Disk I/O) и последующую выборку бэкендом. NFR-002
-(Throughput): Система должна поддерживать стабильную работу при 10 000
-активных сессий (ботов). 4.2. Надежность NFR-003 (Consistency):
-Финансовые данные (балансы) в PostgreSQL должны быть строго согласованы
-(ACID). Данные котировок в ClickHouse могут иметь модель согласованности
-“Eventual Consistency” (допускается небольшая задержка появления
-данных). 5. ТРЕБОВАНИЯ К СДАЧЕ И ОТЧЕТНОСТИ 5.1. Демонстрация DEMO-001:
-Запуск двух эмуляторов с разными клиентами. DEMO-002: Визуальное
-сравнение задержки (лага) между генерацией данных и их появлением на
-графике. DEMO-003: Демонстрация дашборда телеметрии (Grafana/Jaeger),
-показывающего путь запроса через систему. 5.2. Документация DOC-001:
-Отчет о выполненной работе (PDF). DOC-002: Сравнительная таблица
-сложности реализации нативного и кросс-платформенного клиента.#
-Архитектура системы HighLoad Invest Ecosystem — Backend</p>
-<h2 id="обоснование-выбора-архитектуры">1. Обоснование выбора
-архитектуры</h2>
+<h2 id="sec-7">Технологические требования</h2>
 <table>
-<colgroup>
-<col style="width: 22%" />
-<col style="width: 27%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
-<th>Фактор</th>
-<th>Значение</th>
-<th>Влияние на выбор</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Команда</td>
-<td>до 10 человек</td>
-<td>Микросервисы (задано ТЗ)</td>
-</tr>
-<tr>
-<td>Сложность домена</td>
-<td>Высокая (финансы + realtime)</td>
-<td>Элементы DDD</td>
-</tr>
-<tr>
-<td>Языки</td>
-<td>Kotlin, Go, C</td>
-<td>Полиглот — микросервисы обязательны</td>
-</tr>
-<tr>
-<td>Базы данных</td>
-<td>ClickHouse, PostgreSQL, Redis</td>
-<td>Database-per-service</td>
-</tr>
-<tr>
-<td>Масштабирование</td>
-<td>10K сессий</td>
-<td>Горизонтальное для API Gateway</td>
-</tr>
-<tr>
-<td>Консистентность</td>
-<td>ACID (финансы) + Eventual (котировки)</td>
-<td>Разделение ответственности по БД</td>
-</tr>
-</tbody>
-</table>
-<p>Техническое задание жёстко задаёт микросервисную архитектуру с 5
-сервисами на 3 языках. Это обосновано: - Разные языки для разных задач
-(Kotlin для API, Go для high-throughput ingestion, C для kernel). -
-Разные требования к масштабированию (API Gateway — горизонтально, Driver
-— один экземпляр). - Разные модели консистентности (ACID vs
-Eventual).</p>
-<h2 id="общая-схема-системы">2. Общая схема системы</h2>
-<pre class="plantuml"><code>@startuml
-!theme plain
-skinparam componentStyle rectangle
-
-package &quot;Mobile Clients&quot; {
-  [Android Native\n(Kotlin/Compose)] as AndroidApp
-  [Cross-Platform\n(React Native)] as CrossApp
-}
-
-package &quot;Backend&quot; {
-  [API Gateway\nKotlin/Ktor\nPort 8080] as APIGateway
-  [Core Banking\nKotlin] as CoreBanking
-  [Ingestion Service\nGo] as Ingestion
-  [Load Tester\n10K bots] as LoadTester
-}
-
-package &quot;Data Stores&quot; {
-  database &quot;PostgreSQL\n(ACID)&quot; as PG
-  database &quot;ClickHouse\n(Columnar)&quot; as CH
-  database &quot;Redis / KeyDB\n(Cache + PubSub)&quot; as Redis
-}
-
-package &quot;Hardware&quot; {
-  [Linux Driver\nC kernel module\n/dev/quotes] as Driver
-}
-
-AndroidApp -down-&gt; APIGateway : REST + WebSocket
-CrossApp -down-&gt; APIGateway : REST + WebSocket
-
-APIGateway -down-&gt; CoreBanking : internal call
-APIGateway -down-&gt; CH : read quotes\n(TCP native)
-APIGateway -down-&gt; Redis : subscribe\n(PubSub)
-
-CoreBanking -down-&gt; PG : read/write\n(ACID, raw SQL)
-
-Ingestion -down-&gt; CH : batch insert\n(TCP native)
-Ingestion -down-&gt; Redis : publish\n(new quotes)
-Ingestion -left-&gt; Driver : read()\nsyscall
-
-LoadTester -up-&gt; APIGateway : HTTP + WebSocket\n(simulated clients)
-
-@enduml</code></pre>
-<h2 id="коммуникация-между-сервисами">3. Коммуникация между
-сервисами</h2>
-<pre class="plantuml"><code>@startuml
-!theme plain
-
-participant &quot;Mobile Client&quot; as Client
-participant &quot;API Gateway\n(Ktor)&quot; as API
-participant &quot;Core Banking\n(Kotlin)&quot; as Bank
-database &quot;PostgreSQL&quot; as PG
-database &quot;ClickHouse&quot; as CH
-database &quot;Redis&quot; as Redis
-participant &quot;Ingestion\n(Go)&quot; as Ingest
-participant &quot;Driver\n(C)&quot; as Driver
-
-== Поток котировок (Data Flow) ==
-
-Driver -&gt; Ingest : read() из /dev/quotes
-Ingest -&gt; Ingest : буферизация (батчинг)
-Ingest -&gt; CH : batch INSERT
-Ingest -&gt; Redis : PUBLISH &quot;new_quotes&quot;
-Redis -&gt; API : subscribe notification
-API -&gt; CH : SELECT latest quotes
-API -&gt; Client : WebSocket push
-
-== Торговая операция (Trade Flow) ==
-
-Client -&gt; API : POST /api/trades\n{ticker, lots, action}
-API -&gt; Bank : executeTrade()
-Bank -&gt; PG : BEGIN TRANSACTION
-Bank -&gt; PG : SELECT balance FROM accounts
-Bank -&gt; CH : SELECT last_price FROM quotes
-Bank -&gt; PG : UPDATE accounts SET balance = ...
-Bank -&gt; PG : INSERT INTO trades ...
-Bank -&gt; PG : COMMIT
-Bank --&gt; API : TradeResult
-API --&gt; Client : 200 OK {trade}
-
-== Получение портфеля ==
-
-Client -&gt; API : GET /api/portfolio
-API -&gt; Bank : getPortfolio(userId)
-Bank -&gt; PG : SELECT * FROM portfolio\nWHERE user_id = ?
-Bank --&gt; API : Portfolio
-API -&gt; CH : SELECT current prices\nFOR tickers IN portfolio
-API --&gt; Client : 200 OK {portfolio + prices}
-
-@enduml</code></pre>
-<h2 id="таблица-коммуникаций">4. Таблица коммуникаций</h2>
-<table>
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 14%" />
-<col style="width: 28%" />
-<col style="width: 37%" />
-</colgroup>
-<thead>
-<tr>
-<th>Связь</th>
-<th>Тип</th>
-<th>Протокол</th>
-<th>Обоснование</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Client → API Gateway</td>
-<td>Синхронный</td>
-<td>REST + WebSocket</td>
-<td>Стандартный API для мобильных</td>
-</tr>
-<tr>
-<td>API Gateway → Core Banking</td>
-<td>Синхронный</td>
-<td>Internal (in-process)</td>
-<td>Сделки требуют синхронного ответа</td>
-</tr>
-<tr>
-<td>API Gateway → ClickHouse</td>
-<td>Синхронный</td>
-<td>TCP (native client)</td>
-<td>Запрос текущих котировок</td>
-</tr>
-<tr>
-<td>API Gateway ← Redis</td>
-<td>Асинхронный</td>
-<td>PubSub (subscribe)</td>
-<td>Push котировок через WebSocket</td>
-</tr>
-<tr>
-<td>Ingestion → ClickHouse</td>
-<td>Асинхронный</td>
-<td>TCP (batch insert)</td>
-<td>Батчевая вставка котировок</td>
-</tr>
-<tr>
-<td>Ingestion → /dev/quotes</td>
-<td>Синхронный</td>
-<td>read() syscall</td>
-<td>Чтение из character device</td>
-</tr>
-<tr>
-<td>Ingestion → Redis</td>
-<td>Асинхронный</td>
-<td>PUBLISH</td>
-<td>Уведомление о новых данных</td>
-</tr>
-<tr>
-<td>Load Tester → API Gateway</td>
-<td>Синхронный</td>
-<td>HTTP + WebSocket</td>
-<td>Имитация 10K клиентов</td>
-</tr>
-</tbody>
-</table>
-<h2 id="data-patterns-database-per-service">5. Data Patterns —
-Database-per-Service</h2>
-<pre class="plantuml"><code>@startuml
-!theme plain
-skinparam componentStyle rectangle
-
-package &quot;Write Path&quot; {
-  [Ingestion Service\n(Go)] as IngestW
-}
-
-package &quot;Read/Write Path&quot; {
-  [API Gateway + Core Banking\n(Kotlin/Ktor)] as APIRW
-}
-
-package &quot;Read Path&quot; {
-  [API Gateway\n(Kotlin/Ktor)] as APIR
-}
-
-database &quot;ClickHouse&quot; as CH {
-  card &quot;quotes&quot; as quotes_table
-  card &quot;candles&quot; as candles_table
-}
-
-database &quot;PostgreSQL&quot; as PG {
-  card &quot;users&quot; as users_table
-  card &quot;accounts&quot; as accounts_table
-  card &quot;trades&quot; as trades_table
-  card &quot;portfolio&quot; as portfolio_table
-}
-
-database &quot;Redis / KeyDB&quot; as Redis {
-  card &quot;cache:quotes:*&quot; as cache_quotes
-  card &quot;pubsub:quotes&quot; as pubsub
-}
-
-IngestW -down-&gt; quotes_table : INSERT (batch)
-IngestW -down-&gt; pubsub : PUBLISH
-
-APIRW -down-&gt; users_table : CRUD
-APIRW -down-&gt; accounts_table : CRUD (ACID)
-APIRW -down-&gt; trades_table : INSERT
-APIRW -down-&gt; portfolio_table : CRUD
-
-APIR -down-&gt; quotes_table : SELECT
-APIR -down-&gt; candles_table : SELECT
-APIR -down-&gt; cache_quotes : GET/SET
-APIR -down-&gt; pubsub : SUBSCRIBE
-
-@enduml</code></pre>
-<p><strong>Принцип разделения данных:</strong> -
-<strong>ClickHouse</strong> — запись: только Ingestion-сервис; чтение:
-API Gateway. - <strong>PostgreSQL</strong> — чтение/запись: Core Banking
-через API Gateway. - <strong>Redis</strong> — общий кэш горячих
-котировок + PubSub для WebSocket push.</p>
-<h2 id="clean-architecture-внутри-kotlin-сервисов">6. Clean Architecture
-внутри Kotlin-сервисов</h2>
-<pre class="plantuml"><code>@startuml
-!theme plain
-skinparam packageStyle frame
-
-package &quot;Presentation Layer&quot; &lt;&lt;Frame&gt;&gt; {
-  [QuoteRoutes.kt] as QR
-  [TradeRoutes.kt] as TR
-  [PortfolioRoutes.kt] as PR
-  [WebSocketHandler.kt] as WS
-  package &quot;DTO&quot; {
-    [QuoteResponse.kt]
-    [TradeRequest.kt]
-    [PortfolioResponse.kt]
-  }
-}
-
-package &quot;Application Layer&quot; &lt;&lt;Frame&gt;&gt; {
-  [GetCurrentQuotes] as UCQ
-  [ExecuteTrade] as UCT
-  [SubscribeToQuotes] as UCS
-  [GetPortfolio] as UCP
-}
-
-package &quot;Domain Layer&quot; &lt;&lt;Frame&gt;&gt; {
-  package &quot;Entities&quot; {
-    [Quote]
-    [Ticker]
-    [User]
-    [Trade]
-    [Account]
-  }
-  package &quot;Repository Interfaces&quot; {
-    [QuoteRepository] as IQR
-    [UserRepository] as IUR
-    [TradeRepository] as ITR
-    [AccountRepository] as IAR
-  }
-}
-
-package &quot;Infrastructure Layer&quot; &lt;&lt;Frame&gt;&gt; {
-  [ClickHouseQuoteRepository] as CHQR
-  [PostgresUserRepository] as PGUR
-  [PostgresTradeRepository] as PGTR
-  [PostgresAccountRepository] as PGAR
-  [RedisQuotePublisher] as RQP
-  [WebSocketQuoteStream] as WSS
-}
-
-QR -down-&gt; UCQ
-TR -down-&gt; UCT
-PR -down-&gt; UCP
-WS -down-&gt; UCS
-
-UCQ -down-&gt; IQR
-UCT -down-&gt; ITR
-UCT -down-&gt; IAR
-UCP -down-&gt; IQR
-UCS -down-&gt; IQR
-
-CHQR .up.|&gt; IQR : implements
-PGUR .up.|&gt; IUR : implements
-PGTR .up.|&gt; ITR : implements
-PGAR .up.|&gt; IAR : implements
-
-@enduml</code></pre>
-<p><strong>Правило зависимостей:</strong> зависимости направлены строго
-внутрь. Domain Layer не знает ни о ClickHouse, ни о PostgreSQL, ни о
-Ktor.</p>
-<h3 id="структура-каталогов">Структура каталогов</h3>
-<pre><code>api-gateway/
-├── src/main/kotlin/
-│   ├── domain/                    # Чистая бизнес-логика (без зависимостей)
-│   │   ├── entities/
-│   │   │   ├── Quote.kt           # Котировка
-│   │   │   ├── Ticker.kt          # Тикер акции
-│   │   │   ├── User.kt            # Пользователь
-│   │   │   ├── Account.kt         # Счёт
-│   │   │   └── Trade.kt           # Сделка
-│   │   └── repositories/          # Только интерфейсы
-│   │       ├── QuoteRepository.kt
-│   │       ├── UserRepository.kt
-│   │       ├── TradeRepository.kt
-│   │       └── AccountRepository.kt
-│   │
-│   ├── application/               # Use cases
-│   │   ├── GetCurrentQuotes.kt
-│   │   ├── SubscribeToQuotes.kt
-│   │   ├── ExecuteTrade.kt
-│   │   └── GetPortfolio.kt
-│   │
-│   ├── infrastructure/            # Реализации интерфейсов
-│   │   ├── clickhouse/
-│   │   │   └── ClickHouseQuoteRepository.kt
-│   │   ├── postgres/
-│   │   │   ├── PostgresUserRepository.kt
-│   │   │   ├── PostgresTradeRepository.kt
-│   │   │   └── PostgresAccountRepository.kt
-│   │   ├── redis/
-│   │   │   └── RedisQuotePublisher.kt
-│   │   └── websocket/
-│   │       └── WebSocketQuoteStream.kt
-│   │
-│   └── presentation/              # Ktor routes + DTO
-│       ├── routes/
-│       │   ├── QuoteRoutes.kt
-│       │   ├── TradeRoutes.kt
-│       │   └── PortfolioRoutes.kt
-│       └── dto/
-│           ├── QuoteResponse.kt
-│           ├── TradeRequest.kt
-│           └── PortfolioResponse.kt
-│
-├── src/test/kotlin/               # Тесты
-├── build.gradle.kts
-└── Dockerfile</code></pre>
-<h2 id="ключевые-архитектурные-решения-adr">7. Ключевые архитектурные
-решения (ADR)</h2>
-<h3 id="adr-001-clickhouse-как-источник-правды-для-котировок">ADR-001:
-ClickHouse как источник правды для котировок</h3>
-<ul>
-<li><strong>Контекст:</strong> Требование ТЗ (FR-SYS-03) — все запросы
-на получение цены обслуживаются выборками из ClickHouse, а не из
-in-memory кэша.</li>
-<li><strong>Решение:</strong> Ingestion-сервис пишет в ClickHouse, API
-Gateway читает из ClickHouse.</li>
-<li><strong>Последствия:</strong> Задержка обновления (батчинг + disk
-I/O), компенсируется Redis-кэшем для горячих данных.</li>
-</ul>
-<h3 id="adr-002-батчинг-в-go-ingestion-сервисе">ADR-002: Батчинг в Go
-Ingestion-сервисе</h3>
-<ul>
-<li><strong>Контекст:</strong> Драйвер генерирует поток котировок
-непрерывно. ClickHouse оптимизирован для batch insert, а не построчной
-вставки.</li>
-<li><strong>Решение:</strong> Go-сервис накапливает котировки в буфер и
-вставляет пачками (например, каждые 100ms или 1000 записей).</li>
-<li><strong>Последствия:</strong> Увеличенная пропускная способность, но
-добавляется задержка буферизации.</li>
-</ul>
-<h3 id="adr-003-redis-pubsub-для-push-уведомлений">ADR-003: Redis PubSub
-для push-уведомлений</h3>
-<ul>
-<li><strong>Контекст:</strong> Клиенты должны получать обновления
-котировок в реальном времени (&lt; 1 сек от генерации).</li>
-<li><strong>Решение:</strong> Ingestion публикует в Redis PubSub при
-каждом батче. API Gateway подписан и пушит через WebSocket.</li>
-<li><strong>Последствия:</strong> Decoupling между Ingestion и API
-Gateway. Redis как единая точка для pub/sub.</li>
-</ul>
-<h3 id="adr-004-postgresql-с-голым-sql-без-orm">ADR-004: PostgreSQL с
-голым SQL (без ORM)</h3>
-<ul>
-<li><strong>Контекст:</strong> Требование ТЗ. Финансовые операции
-требуют строгого контроля транзакций (ACID).</li>
-<li><strong>Решение:</strong> Прямые SQL-запросы через JDBC-драйвер
-(например, Exposed в SQL DSL режиме или чистый JDBC).</li>
-<li><strong>Последствия:</strong> Полный контроль над запросами и
-транзакциями, но больше boilerplate.</li>
-</ul>
-<h3 id="adr-005-manual-di-вместо-koin">ADR-005: Manual DI вместо
-Koin</h3>
-<ul>
-<li><strong>Контекст:</strong> Изначально планировался Koin как
-DI-фреймворк. На практике в Ktor 3.x с фат-jar возникал конфликт классов
-между Ktor 2.x внутри Koin-Ktor и нашей Ktor 3.1.2.</li>
-<li><strong>Решение:</strong> Все зависимости создаются вручную в
-<code>Application.module()</code> и явно прокидываются вниз (репозитории
-→ use cases → routes). Учебный проект, оверхед mappings оправдан
-простотой и отсутствием сторонних рантаймов.</li>
-<li><strong>Последствия:</strong> Меньше магии, проще читать;
-тестируемость остаётся (use cases принимают интерфейсы
-репозиториев).</li>
-</ul>
-<h3
-id="adr-006-opentelemetry-с-otlp-grpc-и-self-hosted-backend">ADR-006:
-OpenTelemetry с OTLP gRPC и self-hosted backend</h3>
-<ul>
-<li><strong>Контекст:</strong> ТЗ требует OpenTelemetry (TR-006,
-FR-OBS-01/02). Нужна минимальная инфраструктура с трейсами и метриками
-для всех трёх языков (Kotlin, Go, Kotlin).</li>
-<li><strong>Решение:</strong>
-<ul>
-<li>В каждый сервис подключается OTEL SDK (Kotlin:
-<code>opentelemetry-bom</code> + <code>opentelemetry-ktor-3.0</code>;
-Go: <code>go.opentelemetry.io/otel</code> +
-<code>otlptracegrpc</code>/<code>otlpmetricgrpc</code>).</li>
-<li>Экспорт в локальный <code>otel-collector</code> через OTLP gRPC
-(<code>:4317</code>).</li>
-<li>Collector маршрутизирует trace → Jaeger (OTLP), metrics → Prometheus
-(<code>/metrics</code> exporter на <code>:8889</code>).</li>
-<li>Grafana с auto-provisioned datasources поднимается для
-дашбордов.</li>
-<li>Trace propagation между сервисами — через стандартный W3C Trace
-Context (HTTP заголовок <code>traceparent</code>); ktor-инструментация
-автоматически принимает и передаёт.</li>
-</ul></li>
-<li><strong>Последствия:</strong> Stack полностью self-hosted, нулевая
-стоимость, полный контроль. В compose-файле появилось 4 контейнера
-(otel-collector, jaeger, prometheus, grafana).</li>
-</ul>
-<h2 id="схема-развёртывания">8. Схема развёртывания</h2>
-<p>Backend разворачивается на одном Linux-хосте (Ubuntu 24.04,
-<code>2.26.49.82</code>). Поверх Docker Compose поднимается
-инфраструктура (PostgreSQL, ClickHouse, Redis) и observability stack.
-Kotlin-сервисы могут запускаться:</p>
-<ul>
-<li><strong>в Docker Compose</strong> (<code>api-gateway</code>,
-<code>core-banking</code>, <code>go-ingestion</code> собираются из
-соответствующих Dockerfile);</li>
-<li><strong>через systemd</strong> (для staging — fat-jar файлы в
-<code>/root/highload-invest/&lt;service&gt;/app.jar</code>, units
-<code>api-gateway.service</code>, <code>core-banking.service</code>
-слушают <code>:8080</code>/<code>:8081</code> напрямую, что упрощает
-локальный insmod kernel-module).</li>
-</ul>
-<p>Перед сервисами стоит nginx (системный) на <code>:80</code>,
-проксирующий <code>/api/*</code>, <code>/ws/*</code>,
-<code>/jaeger/</code>, <code>/grafana/</code> на нужные upstream-ы.</p>
-<pre class="plantuml"><code>@startuml
-!theme plain
-
-cloud &quot;Internet&quot; as net
-
-node &quot;Linux host (2.26.49.82)&quot; {
-
-  node &quot;nginx :80&quot; as nginx
-
-  package &quot;Docker Compose stack&quot; {
-    node &quot;postgres :5432&quot; as pg
-    node &quot;clickhouse :8123/:9000&quot; as ch
-    node &quot;redis :6379&quot; as redis
-
-    node &quot;otel-collector\n:4317 / :4318 / :8889&quot; as otel
-    node &quot;jaeger :16686&quot; as jaeger
-    node &quot;prometheus :9090&quot; as prom
-    node &quot;grafana :3000&quot; as grafana
-
-    node &quot;go-ingestion&quot; as ingest
-  }
-
-  package &quot;systemd services&quot; {
-    node &quot;api-gateway :8080&quot; as api
-    node &quot;core-banking :8081&quot; as bank
-  }
-
-  node &quot;kernel module\n/dev/quotes&quot; as driver
-}
-
-net --&gt; nginx
-
-nginx --&gt; api : /api/quotes, /ws/*
-nginx --&gt; bank : /api/users, /api/trades, /api/portfolio, /api/accounts
-nginx --&gt; jaeger : /jaeger/
-nginx --&gt; grafana : /grafana/
-
-api --&gt; ch
-api --&gt; redis
-api --&gt; bank : HTTP proxy
-api ..&gt; otel : OTLP gRPC
-bank --&gt; pg
-bank ..&gt; otel : OTLP gRPC
-
-ingest --&gt; ch
-ingest --&gt; redis
-ingest -left-&gt; driver : read /dev/quotes
-ingest ..&gt; otel : OTLP gRPC
-
-otel --&gt; jaeger : traces (OTLP)
-otel ..&gt; prom : /metrics scrape
-prom --&gt; grafana : datasource
-
-@enduml</code></pre>
-<h2 id="нефункциональные-требования-и-архитектурные-ответы">9.
-Нефункциональные требования и архитектурные ответы</h2>
-<table>
-<colgroup>
-<col style="width: 26%" />
-<col style="width: 23%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr>
+<th>Область</th>
 <th>Требование</th>
-<th>Значение</th>
-<th>Архитектурный ответ</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td>NFR-001 Latency</td>
-<td>&lt; 1 сек от генерации до клиента</td>
-<td>Redis PubSub + WebSocket push, батч &lt; 100ms</td>
+<tbody><tr>
+<td>Нативный клиент</td>
+<td>Android, Kotlin, Jetpack Compose</td>
 </tr>
 <tr>
-<td>NFR-002 Throughput</td>
-<td>10K активных сессий</td>
-<td>Горизонтальное масштабирование API Gateway, корутины Ktor</td>
+<td>Кросс-платформенный клиент</td>
+<td>React Native</td>
 </tr>
 <tr>
-<td>NFR-003 Consistency</td>
-<td>ACID для балансов</td>
-<td>PostgreSQL транзакции, READ COMMITTED +
-<code>SELECT ... FOR UPDATE</code></td>
+<td>Backend API</td>
+<td>Kotlin, Ktor, coroutines, JSON serialization</td>
 </tr>
 <tr>
-<td>FR-OBS-01 Metrics</td>
-<td>RPS, Error Rate, Latency</td>
-<td>OpenTelemetry SDK → Collector → Prometheus → Grafana</td>
+<td>Сбор котировок</td>
+<td>Go</td>
 </tr>
 <tr>
-<td>FR-OBS-02 Tracing</td>
-<td>Сквозной трейсинг</td>
-<td>OpenTelemetry W3C Trace Context, Jaeger UI</td>
+<td>Генерация котировок</td>
+<td>Linux driver, C</td>
 </tr>
-</tbody>
-</table>
-<h2 id="observability-детальный-поток-данных">10. Observability —
-детальный поток данных</h2>
-<pre class="plantuml"><code>@startuml
-!theme plain
-skinparam componentStyle rectangle
-
-package &quot;Application services&quot; {
-  [api-gateway\n(SDK)] as api
-  [core-banking\n(SDK)] as bank
-  [go-ingestion\n(SDK)] as ingest
-}
-
-package &quot;Telemetry pipeline&quot; {
-  [otel-collector\nOTLP receiver\nbatch processor] as col
-  database &quot;Jaeger\n(traces)&quot; as jaeger
-  database &quot;Prometheus\n(metrics)&quot; as prom
-}
-
-package &quot;Dashboards / UI&quot; {
-  [Jaeger UI :16686] as juI
-  [Grafana :3000] as graf
-}
-
-api  -down-&gt; col : OTLP gRPC :4317\n(spans + metrics)
-bank -down-&gt; col : OTLP gRPC :4317
-ingest -down-&gt; col : OTLP gRPC :4317
-
-col --&gt; jaeger : OTLP gRPC
-col --&gt; prom : /metrics on :8889\n(scrape every 15s)
-
-jaeger -up-&gt; juI
-prom --&gt; graf : datasource
-
-@enduml</code></pre>
-<h3 id="что-инструментировано">Что инструментировано</h3>
+<tr>
+<td>Кэш и сообщения</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>Пользовательские данные</td>
+<td>PostgreSQL, SQL</td>
+</tr>
+<tr>
+<td>История котировок</td>
+<td>ClickHouse</td>
+</tr>
+<tr>
+<td>Телеметрия</td>
+<td>OpenTelemetry</td>
+</tr>
+<tr>
+<td>Развёртывание</td>
+<td>Docker Compose</td>
+</tr>
+</tbody></table>
+<h2 id="sec-8">Функциональные требования</h2>
+<p>Функциональные требования сформулированы в формате SRS: каждое требование
+имеет идентификатор, проверяемую формулировку и критерий приёмки.</p>
 <table>
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 46%" />
-<col style="width: 35%" />
-</colgroup>
 <thead>
 <tr>
-<th>Сервис</th>
-<th>Spans (auto/manual)</th>
-<th>Custom метрики</th>
+<th>ID</th>
+<th>Требование</th>
+<th>Критерий приёмки</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td>api-gateway</td>
-<td>HTTP server (auto), <code>clickhouse.&lt;op&gt;</code> (manual),
-Jedis pubsub (через Redis JedisPubSub onMessage)</td>
-<td><code>ws.active_connections</code>,
-<code>ws.messages.broadcast</code>, <code>redis.pubsub.messages</code>,
-<code>clickhouse.query.duration</code>,
-<code>banking.proxy.duration</code></td>
+<tbody><tr>
+<td>FR-01</td>
+<td>Система должна генерировать поток котировок на уровне ядра Linux через драйвер на C.</td>
+<td>После загрузки модуля доступно устройство <code>/dev/quotes</code>, из которого можно читать котировки.</td>
 </tr>
 <tr>
-<td>core-banking</td>
-<td>HTTP server (auto), <code>trade.execute</code> (manual),
-<code>db.query.duration</code> (вокруг JDBC)</td>
-<td><code>trades.success</code>, <code>trades.failed</code>,
-<code>trade.execute.duration</code>, <code>users.created</code>,
-<code>db.query.duration</code></td>
+<td>FR-02</td>
+<td>Ingestion-сервис должен читать котировки из <code>/dev/quotes</code> или fallback-генератора и нормализовать их к структуре <code>ticker</code>, <code>price</code>, <code>volume</code>, <code>timestamp</code>.</td>
+<td>Валидные строки драйвера преобразуются в объекты котировок; невалидные строки не останавливают обработку.</td>
 </tr>
 <tr>
-<td>go-ingestion</td>
-<td><code>clickhouse.insert_batch</code>, <code>redis.publish</code>
-(manual)</td>
-<td><code>quotes.ingested</code>, <code>clickhouse.batch_size</code>,
-<code>clickhouse.insert.duration</code>,
-<code>redis.publish.duration</code>,
-<code>clickhouse.insert.failures</code></td>
+<td>FR-03</td>
+<td>Ingestion-сервис должен батчами сохранять котировки в ClickHouse.</td>
+<td>Таблица <code>quotes</code> пополняется новыми записями; размер батча и интервал flush управляются параметрами окружения.</td>
 </tr>
-</tbody>
-</table>
-<h3 id="trace-propagation">Trace propagation</h3>
-<p>W3C Trace Context включён по умолчанию
-(<code>W3CTraceContextPropagator</code>). HTTP-запрос из api-gateway →
-core-banking несёт заголовок <code>traceparent</code>, серверная
-ktor-инструментация в core-banking подхватывает родительский context — в
-Jaeger обе span’ы оказываются в одной trace.</p>
-<p>Между go-ingestion и api-gateway propagation отсутствует (Redis
-pubsub не несёт OTEL контекст), поэтому трасса публикации и трасса
-WS-broadcast разделены. Это допустимо для учебного проекта;
-production-решение использовало бы <code>baggage</code> или Kafka
-headers. # Описание реализации backend</p>
-<p>Этот документ описывает структуру исходного кода каждого
-backend-сервиса HighLoad Invest и ключевые технические решения.
-Архитектурный обзор см. <a
-href="architecture.md"><code>architecture.md</code></a>.</p>
-<h2 id="общие-принципы">1. Общие принципы</h2>
-<p>Все Kotlin-сервисы организованы по <strong>Clean
-Architecture</strong> с четырьмя слоями:</p>
-<pre><code>src/main/kotlin/com/highloadinvest/&lt;service&gt;/
-├── Application.kt                     # composition root + DI вручную
-├── domain/                            # Pure Kotlin, без зависимостей
-│   ├── entities/                      # data classes (Quote, User, Trade, ...)
-│   └── repositories/                  # interfaces, не классы
-├── application/usecases/              # бизнес-сценарии, принимают репозитории-интерфейсы
-├── infrastructure/                    # JDBC / HTTP / OTel — конкретные реализации
-└── presentation/                      # Ktor-маршруты + DTO</code></pre>
-<p>Зависимости идут только в направлении внутрь:
-<code>presentation → application → domain ← infrastructure</code>.
-Domain ничего не знает ни о Ktor, ни о PostgreSQL, ни о ClickHouse — это
-позволяет тестировать use cases с моками репозиториев без I/O.</p>
-<h3 id="внедрение-зависимостей">Внедрение зависимостей</h3>
-<p>Изначально планировался Koin, но в Ktor 3.x обнаружился
-classloader-конфликт (см. ADR-005). Поэтому композиция выполняется
-вручную в <code>Application.module()</code>:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">Application</span><span class="op">.</span><span class="fu">module</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">openTelemetry</span> <span class="op">=</span> Telemetry<span class="op">.</span>init<span class="op">()</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">metrics</span> <span class="op">=</span> BankingMetrics<span class="op">(</span>openTelemetry<span class="op">)</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    DatabaseFactory<span class="op">.</span>init<span class="op">(</span>environment<span class="op">.</span>config<span class="op">)</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">userRepo</span>  <span class="op">=</span> PostgresUserRepository<span class="op">()</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">accountRepo</span> <span class="op">=</span> PostgresAccountRepository<span class="op">()</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">executeTrade</span> <span class="op">=</span> PostgresTradeExecutor<span class="op">(</span>openTelemetry<span class="op">,</span> metrics<span class="op">)</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    routing <span class="op">{</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        route<span class="op">(</span><span class="st">&quot;/api&quot;</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            userRoutes<span class="op">(</span>userRepo<span class="op">,</span> accountRepo<span class="op">,</span> metrics<span class="op">)</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            tradeRoutes<span class="op">(</span>executeTrade<span class="op">,</span> tradeRepo<span class="op">)</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">...</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="логирование">Логирование</h3>
-<p>SLF4J + Logback. Конфигурация
-<code>src/main/resources/logback.xml</code> читает уровень из переменной
-окружения <code>LOG_LEVEL</code> (DEBUG / INFO / WARN / ERROR), формат
-сообщений — <code>[timestamp] [level] [logger] - message</code>. Это
-позволяет в production снизить шум до INFO без перекомпиляции.</p>
-<h2 id="api-gateway-kotlin-ktor">2. api-gateway (Kotlin / Ktor)</h2>
-<h3 id="назначение">Назначение</h3>
-<p>Единая точка входа для мобильных клиентов. Реализует: - REST для
-котировок и свечей (читает ClickHouse напрямую через HTTP API); -
-HTTP-прокси <code>/api/users</code>, <code>/api/trades</code>,
-<code>/api/portfolio</code>, <code>/api/accounts</code> на core-banking;
-- WebSocket <code>/ws/quotes</code> — подписку на realtime-обновления
-цены.</p>
-<h3 id="точка-входа">Точка входа</h3>
-<p><a
-href="../api-gateway/src/main/kotlin/com/highloadinvest/gateway/Application.kt"><code>Application.kt</code></a>:</p>
-<ol type="1">
-<li>Поднимает OpenTelemetry SDK через
-<code>Telemetry.init()</code>.</li>
-<li>Создаёт <code>ClickHouseQuoteRepository</code>,
-<code>RedisQuoteSubscriber</code>,
-<code>QuoteWebSocketHandler</code>.</li>
-<li>Подписывает <code>RedisQuoteSubscriber</code> на канал
-<code>quotes:updates</code> и при каждом событии вызывает
-<code>wsHandler.broadcast(message)</code> — сообщение уходит всем
-активным WS-сессиям.</li>
-<li>Регистрирует <code>KtorServerTelemetry</code> для
-авто-инструментации HTTP-входящих.</li>
-<li>Routing объявляет <code>/health</code>,
-<code>/api/quotes/...</code>, <code>/api/users → /api/portfolio</code>
-(через <code>bankingProxyRoutes</code>), <code>/ws/quotes</code>.</li>
-</ol>
-<h3 id="clickhouse-репозиторий">ClickHouse-репозиторий</h3>
-<p><a
-href="../api-gateway/src/main/kotlin/com/highloadinvest/gateway/infrastructure/clickhouse/ClickHouseQuoteRepository.kt"><code>ClickHouseQuoteRepository.kt</code></a>
-делает HTTP-запросы к
-<code>clickhouse:8123/?query=...&amp;FORMAT=JSONEachRow</code>.</p>
-<p>Каждый вызов оборачивается в OTel-span
-<code>clickhouse.&lt;operation&gt;</code> через helper
-<code>traced()</code>:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">getLatestQuotes</span><span class="op">():</span> <span class="dt">List</span><span class="op">&lt;</span><span class="dt">Quote</span><span class="op">&gt;</span> <span class="op">=</span> traced<span class="op">(</span><span class="st">&quot;getLatestQuotes&quot;</span><span class="op">,</span> <span class="st">&quot;SELECT ...&quot;</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><code>traced()</code> автоматически: - открывает span
-<code>SpanKind.CLIENT</code> с атрибутами
-<code>db.system=clickhouse</code> и
-<code>db.statement=&lt;первые 500 символов SQL&gt;</code>; - ловит
-исключения и помечает span ошибкой; - меряет длительность через
-<code>metrics.clickhouseQueryDuration</code> гистограмму.</p>
-<h3 id="redis-pubsub-websocket-fan-out">Redis pubsub → WebSocket
-fan-out</h3>
-<p><a
-href="../api-gateway/src/main/kotlin/com/highloadinvest/gateway/infrastructure/redis/RedisQuoteSubscriber.kt"><code>RedisQuoteSubscriber.kt</code></a>
-использует Jedis <code>JedisPubSub</code> в отдельном daemon-потоке.
-Колбэк <code>onMessage</code> просто вызывает переданный лямбда
-<code>(String) -&gt; Unit</code>, переданный из
-<code>Application.module()</code>.</p>
-<p><a
-href="../api-gateway/src/main/kotlin/com/highloadinvest/gateway/presentation/websocket/QuoteWebSocket.kt"><code>QuoteWebSocketHandler.kt</code></a>:
-- хранит активные сессии в <code>ConcurrentHashMap.newKeySet()</code>; -
-инкрементирует/декрементирует <code>ws.active_connections</code> гейдж
-при connect/disconnect; - <code>broadcast(message)</code> отправляет
-сообщение каждой сессии через <code>runBlocking { send(...) }</code>;
-сессии, бросившие исключение, удаляются из набора (живой
-backpressure).</p>
-<p>Коэффициент усиления: один Redis-message → N WebSocket-фреймов (N —
-текущее число подписчиков). Это и есть ключевой паттерн «fan-out» для
-NFR-001.</p>
-<h2 id="core-banking-kotlin-ktor-postgresql">3. core-banking (Kotlin /
-Ktor / PostgreSQL)</h2>
-<h3 id="назначение-1">Назначение</h3>
-<p>Хранит пользователей, счета и сделки. Все финансовые операции в
-транзакциях PostgreSQL с уровнем изоляции <code>READ COMMITTED</code> и
-<code>SELECT ... FOR UPDATE</code> для блокировки строк баланса и
-портфеля во время сделки.</p>
-<h3 id="подключение-к-бд">Подключение к БД</h3>
-<p><a
-href="../core-banking/src/main/kotlin/com/highloadinvest/banking/infrastructure/postgres/DatabaseFactory.kt"><code>DatabaseFactory.kt</code></a>
-создаёт HikariCP <code>DataSource</code> с пулом размером
-<code>DATABASE_MAX_POOL_SIZE</code> (по умолчанию 20). При старте читает
-SQL-миграцию <code>db/migration/V1__init.sql</code> и выполняет её —
-таблицы <code>users</code>, <code>accounts</code>, <code>trades</code>,
-<code>portfolio</code>.</p>
-<p>Каждый Repository получает соединение через
-<code>DatabaseFactory.connection()</code>, которое нужно закрыть через
-<code>.use { conn -&gt; ... }</code> — оно вернётся в пул.</p>
-<p>Транзакции — через <code>conn.autoCommit = false</code> и явный
-<code>commit()</code> / <code>rollback()</code>. Это нужно для
-multi-step операций (балансы + позиции).</p>
-<h3 id="postgrestradeexecutor">PostgresTradeExecutor</h3>
-<p><a
-href="../core-banking/src/main/kotlin/com/highloadinvest/banking/infrastructure/postgres/PostgresTradeExecutor.kt"><code>PostgresTradeExecutor.kt</code></a>
-— самая сложная транзакция в системе. Алгоритм для BUY:</p>
-<ol type="1">
-<li><code>BEGIN</code> (<code>autoCommit = false</code>,
-<code>READ COMMITTED</code>).</li>
-<li><code>SELECT balance FROM accounts WHERE user_id = ? FOR UPDATE</code>
-— блокировка строки баланса до конца транзакции.</li>
-<li>Если <code>balance &lt; totalAmount</code> →
-<code>IllegalArgumentException</code>, <code>rollback</code>.</li>
-<li><code>UPDATE accounts SET balance = balance - totalAmount</code>.</li>
-<li><code>INSERT INTO portfolio (...) ON CONFLICT (user_id, ticker) DO UPDATE SET  lots = portfolio.lots + EXCLUDED.lots,  avg_price = (...weighted average...)</code>
-— upsert позиции с пересчётом средней цены по weighted average.</li>
-<li><code>INSERT INTO trades (...)</code> — запись в историю.</li>
-<li><code>COMMIT</code>.</li>
-</ol>
-<p>Для SELL — симметрично: блокируется и баланс, и позиция в портфеле,
-проверяется наличие достаточного количества лотов, затем уменьшается
-позиция (с удалением строки при <code>lots = 0</code>) и увеличивается
-баланс.</p>
-<p>Span <code>trade.execute</code> оборачивает всю транзакцию; в
-атрибуты пишутся <code>trade.id</code>, <code>user_id</code>,
-<code>ticker</code>, <code>action</code>, <code>lots</code>,
-<code>total_amount</code>. На finally —
-<code>metrics.tradeDuration.record(...)</code> плюс
-<code>tradesSuccess</code> / <code>tradesFailed</code>.</p>
-<h3 id="маршруты-ktor">Маршруты Ktor</h3>
-<ul>
-<li><a
-href="../core-banking/src/main/kotlin/com/highloadinvest/banking/presentation/routes/UserRoutes.kt"><code>UserRoutes.kt</code></a>
-— <code>POST /api/users</code> (создание + initial balance),
-<code>GET /api/users/{id}</code>,
-<code>POST /api/accounts/{userId}/deposit</code>. Депозит — учебный (без
-интеграции с внешним эквайером).</li>
-<li><a
-href="../core-banking/src/main/kotlin/com/highloadinvest/banking/presentation/routes/TradeRoutes.kt"><code>TradeRoutes.kt</code></a>
-— <code>POST /api/trades</code> (вызывает
-<code>executeTrade.execute(...)</code>),
-<code>GET /api/trades/{userId}</code>.</li>
-<li><a
-href="../core-banking/src/main/kotlin/com/highloadinvest/banking/presentation/routes/PortfolioRoutes.kt"><code>PortfolioRoutes.kt</code></a>
-— <code>GET /api/portfolio/{userId}</code>. Возвращает список позиций с
-агрегатной стоимостью.</li>
-</ul>
-<p>Ошибки конвертируются в JSON через <code>StatusPages</code> плагин:
-<code>IllegalArgumentException</code> → 400,
-<code>NoSuchElementException</code> → 404, <code>Throwable</code> →
-500.</p>
-<h2 id="go-ingestion-go">4. go-ingestion (Go)</h2>
-<h3 id="назначение-2">Назначение</h3>
-<p>Читает котировки из <code>/dev/quotes</code> (символьное устройство
-ядра), батчует и загружает в ClickHouse, публикует в Redis pubsub
-<code>quotes:updates</code>. Если устройство недоступно — переключается
-на встроенный fallback-генератор с теми же тикерами и
-волатильностями.</p>
-<h3 id="точка-входа-1">Точка входа</h3>
-<p><a href="../go-ingestion/main.go"><code>main.go</code></a>
-<code>main()</code>:</p>
-<ol type="1">
-<li>Читает env: <code>QUOTES_DEVICE</code>,
-<code>CLICKHOUSE_HTTP</code>, <code>REDIS_ADDR</code>,
-<code>BATCH_SIZE</code>, <code>INTERVAL_MS</code>,
-<code>OTEL_EXPORTER_OTLP_ENDPOINT</code>,
-<code>QUOTES_REQUIRE_DEVICE</code>,
-<code>QUOTES_DEVICE_WAIT_SEC</code>.</li>
-<li><code>initTelemetry()</code> — создаёт TracerProvider и
-MeterProvider с OTLP HTTP-экспортёром на эндпоинт
-<code>OTEL_EXPORTER_OTLP_ENDPOINT/v1/traces</code> и
-<code>/v1/metrics</code>.</li>
-<li><code>waitForDevice(path, timeout)</code> — пытается открыть
-<code>/dev/quotes</code> до <code>QUOTES_DEVICE_WAIT_SEC</code> секунд
-(даёт времени драйверу инициализироваться при старте host-а). Если
-требование жёсткое (<code>QUOTES_REQUIRE_DEVICE=true</code>) —
-<code>log.Fatalf</code> при отсутствии.</li>
-<li>Запускает <code>readDevice()</code> (snapshot-based чтение) или
-<code>generateFallback()</code>.</li>
-<li>Главный цикл: получает котировки из канала, аккумулирует в буфер,
-при достижении <code>BATCH_SIZE</code> — вызывает <code>flush()</code>
-(insert в ClickHouse), также по таймеру 1 раз в секунду.</li>
-</ol>
-<h3 id="чтение-драйвера">Чтение драйвера</h3>
-<p><code>readDevice(path, interval, out, allowFallback)</code>
-использует snapshot-based подход:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>seen <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>time<span class="op">.</span>Time<span class="op">)</span>  <span class="co">// дедупликация по ticker+ts</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">{</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">:=</span> readDeviceSnapshot<span class="op">(</span>path<span class="op">)</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> line <span class="op">:=</span> <span class="kw">range</span> lines <span class="op">{</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> q<span class="op">,</span> ok <span class="op">:=</span> parseDriverLine<span class="op">(</span>line<span class="op">);</span> ok <span class="op">{</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> t<span class="op">,</span> exists <span class="op">:=</span> seen<span class="op">[</span>q<span class="op">.</span>Ticker<span class="op">+</span>q<span class="op">.</span>Timestamp<span class="op">];</span> <span class="op">!</span>exists <span class="op">||</span> time<span class="op">.</span>Since<span class="op">(</span>t<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">1</span><span class="op">*</span>Second <span class="op">{</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                seen<span class="op">[</span>q<span class="op">.</span>Ticker<span class="op">+</span>q<span class="op">.</span>Timestamp<span class="op">]</span> <span class="op">=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                out <span class="op">&lt;-</span> q</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    time<span class="op">.</span>Sleep<span class="op">(</span>interval<span class="op">)</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><code>readDeviceSnapshot()</code> открывает устройство, читает все
-доступные строки, закрывает — это совместимо с тем, как драйвер отдаёт
-сглаженный «snapshot» ring-buffer-а через <code>read()</code>.</p>
-<h3 id="запись-в-clickhouse">Запись в ClickHouse</h3>
-<p><code>insertClickHouse(baseURL, rows)</code> собирает TSV-payload и
-отправляет POST на
-<code>?query=INSERT INTO quotes ... FORMAT TabSeparated</code>. Тело —
-ASCII-байты с <code>\t</code>-разделителем, что заметно эффективнее JSON
-для bulk-вставок.</p>
-<p>OTel-span <code>clickhouse.insert_batch</code> с атрибутом
-<code>batch.size</code>, метрика <code>clickhouse.batch_size</code>
-(гистограмма) и <code>clickhouse.insert.duration</code>.</p>
-<h3 id="публикация-в-redis">Публикация в Redis</h3>
-<p><code>publishQuote(ctx, rdb, q)</code> сериализует Quote в JSON и
-публикует в <code>quotes:updates</code>. Span <code>redis.publish</code>
-с атрибутами <code>messaging.system=redis</code>,
-<code>messaging.destination=quotes:updates</code>,
-<code>ticker</code>.</p>
-<h2 id="quote-generator-и-load-tester-учебные">5. quote-generator и
-load-tester (учебные)</h2>
-<p><a href="../quote-generator/"><code>quote-generator/</code></a> —
-Kotlin-аналог Go ingestion для случаев, когда драйвер недоступен и
-хочется управлять параметрами генерации из той же среды (Kotlin team).
-Подключается через <code>compose --profile legacy-generator</code>.</p>
-<p><a href="../load-tester/"><code>load-tester/</code></a> —
-Kotlin-приложение на Ktor HTTP-клиенте, имитирующее N клиентов: -
-<code>CREATE_PARALLELISM</code> — сколько ботов создаются параллельно; -
-<code>ACTIVE_REQUESTS</code> — лимит одновременных in-flight запросов на
-бот; - <code>WS_PERCENT</code> — процент ботов, открывающих
-WebSocket-подписку; - <code>BOT_COUNT</code>, <code>DURATION_SEC</code>
-— общая нагрузка.</p>
-<p>Подробнее — в разделе нагрузочного тестирования <a
-href="testing.md"><code>testing.md</code></a>.</p>
-<h2 id="observability-в-коде">6. Observability в коде</h2>
-<p>Каждый Kotlin-сервис имеет пакет
-<code>infrastructure/observability/</code>: - <code>Telemetry.kt</code>
-— инициализация SDK (OTLP gRPC экспортёр на 4317); -
-<code>Metrics.kt</code> — <code>Meter.counterBuilder</code>,
-<code>histogramBuilder</code> для domain-метрик
-(<code>trades.success</code>, <code>clickhouse.query.duration</code>,
-<code>ws.active_connections</code>, …).</p>
-<p>Go-сервис использует OTLP HTTP (4318) — встроенная функция
-<code>initTelemetry</code> в <code>main.go</code>.</p>
-<p>Все экспортируемые метрики и спаны попадают в
-<code>otel-collector</code>, который маршрутизирует traces в Jaeger и
-metrics в Prometheus, см. <a
-href="../otel/otel-config.yaml"><code>backend/otel/otel-config.yaml</code></a>.
-# Тестирование backend</p>
-<p>Документ описывает все слои тестирования backend-платформы HighLoad
-Invest: unit-, integration-, end-to-end и нагрузочное тестирование.</p>
-<h2 id="unit-тесты">1. Unit-тесты</h2>
+<tr>
+<td>FR-04</td>
+<td>ClickHouse должен выступать источником истины для текущих и исторических котировок.</td>
+<td>API получает последние цены и свечные данные выборками из ClickHouse.</td>
+</tr>
+<tr>
+<td>FR-05</td>
+<td>API Gateway должен предоставлять REST endpoint для получения списка последних котировок.</td>
+<td><code>GET /api/quotes</code> возвращает JSON-массив актуальных котировок.</td>
+</tr>
+<tr>
+<td>FR-06</td>
+<td>API Gateway должен предоставлять REST endpoint для получения свечных данных по тикеру.</td>
+<td><code>GET /api/quotes/{ticker}/candles?from=...&amp;to=...</code> возвращает OHLCV-данные.</td>
+</tr>
+<tr>
+<td>FR-07</td>
+<td>Система должна доставлять realtime-обновления котировок через WebSocket.</td>
+<td>Подключённый клиент <code>WS /ws/quotes</code> получает сообщения, опубликованные ingestion-сервисом через Redis Pub/Sub.</td>
+</tr>
+<tr>
+<td>FR-08</td>
+<td>Backend должен предоставлять единый внешний API для native Android и React Native клиентов.</td>
+<td>Оба клиента используют одинаковые REST/WebSocket endpoints.</td>
+</tr>
+<tr>
+<td>FR-09</td>
+<td>Система должна позволять создать учебного пользователя и инвестиционный счёт.</td>
+<td><code>POST /api/users</code> создаёт пользователя, счёт и возвращает идентификатор пользователя.</td>
+</tr>
+<tr>
+<td>FR-10</td>
+<td>Система должна поддерживать пополнение учебного счёта условными средствами.</td>
+<td><code>POST /api/accounts/{userId}/deposit</code> увеличивает баланс пользователя в PostgreSQL.</td>
+</tr>
+<tr>
+<td>FR-11</td>
+<td>Система должна исполнять BUY-заявку при достаточном балансе.</td>
+<td>Покупка уменьшает баланс, увеличивает позицию портфеля и записывает сделку в одной транзакции.</td>
+</tr>
+<tr>
+<td>FR-12</td>
+<td>Система должна исполнять SELL-заявку при достаточном количестве лотов.</td>
+<td>Продажа увеличивает баланс, уменьшает позицию портфеля и записывает сделку в одной транзакции.</td>
+</tr>
+<tr>
+<td>FR-13</td>
+<td>Система должна отклонять некорректные торговые операции.</td>
+<td>Неположительные лоты, неположительная цена, недостаточный баланс или недостаточная позиция возвращают ошибку без изменения финансовых данных.</td>
+</tr>
+<tr>
+<td>FR-14</td>
+<td>Система должна возвращать портфель пользователя.</td>
+<td><code>GET /api/portfolio/{userId}</code> возвращает баланс, валюту и список позиций по тикерам.</td>
+</tr>
+<tr>
+<td>FR-15</td>
+<td>Native Android клиент должен реализовывать основной пользовательский сценарий.</td>
+<td>Пользователь может зарегистрироваться, видеть котировки, получить realtime-обновление, пополнить счёт, купить/продать лоты и посмотреть портфель.</td>
+</tr>
+<tr>
+<td>FR-16</td>
+<td>React Native клиент должен реализовывать тот же основной сценарий.</td>
+<td>Cross-platform клиент функционально сопоставим с native Android клиентом.</td>
+</tr>
+<tr>
+<td>FR-17</td>
+<td>Система должна собирать метрики и распределённые трассы.</td>
+<td>Метрики доступны в Grafana/Prometheus, traces доступны в Jaeger.</td>
+</tr>
+<tr>
+<td>FR-18</td>
+<td>Система должна включать нагрузочный тестер.</td>
+<td>Load-tester создаёт пользователей, выполняет REST-запросы, торговые операции и WebSocket-подключения с параметризуемой нагрузкой.</td>
+</tr>
+<tr>
+<td>FR-19</td>
+<td>Система должна воспроизводимо запускаться на стенде.</td>
+<td>Docker Compose поднимает PostgreSQL, ClickHouse, Redis, backend, ingestion и observability-компоненты с healthcheck-ами.</td>
+</tr>
+</tbody></table>
+<h2 id="sec-9">Нефункциональные требования</h2>
+<p>Нефункциональные требования определяют не отдельные функции, а свойства системы:
+производительность, согласованность, наблюдаемость, сопровождаемость и
+воспроизводимость.</p>
 <table>
-<colgroup>
-<col style="width: 26%" />
-<col style="width: 23%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
-<th>Сервис</th>
-<th>Файлы</th>
-<th>Что покрывает</th>
+<th>ID</th>
+<th>Категория</th>
+<th>Требование</th>
+<th>Проверка</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td><code>core-banking</code></td>
-<td><code>src/test/kotlin/.../usecases/ExecuteTradeTest.kt</code></td>
-<td>Логика расчёта суммы сделки, валидация баланса, BUY/SELL с моками
-репозиториев</td>
+<tbody><tr>
+<td>NFR-01</td>
+<td>Performance</td>
+<td>Задержка доставки realtime-котировки на клиентский терминал должна стремиться к значению менее 1 секунды на демонстрационном стенде.</td>
+<td>Сравнение timestamp котировки, WebSocket-доставки, UI-обновления и trace/metrics в Grafana/Jaeger.</td>
 </tr>
 <tr>
-<td><code>api-gateway</code></td>
-<td><code>src/test/kotlin/.../routes/HealthRoutesTest.kt</code></td>
-<td>Ktor <code>testApplication</code> для <code>/health</code></td>
+<td>NFR-02</td>
+<td>Scalability</td>
+<td>Архитектура должна быть рассчитана на сценарий до 10 000 активных пользовательских сессий.</td>
+<td>Запуск load-tester с параметрами <code>BOT_COUNT</code>, <code>ACTIVE_REQUESTS</code>, <code>WS_PERCENT</code>; контроль error rate и latency.</td>
 </tr>
-</tbody>
-</table>
-<p>Запуск:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="bu">cd</span> backend/api-gateway   <span class="kw">&amp;&amp;</span> <span class="ex">./gradlew</span> test<span class="kw">)</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="bu">cd</span> backend/core-banking  <span class="kw">&amp;&amp;</span> <span class="ex">./gradlew</span> test<span class="kw">)</span></span></code></pre></div>
-<p>Используются: JUnit 5 (<code>useJUnitPlatform</code>), Ktor
-<code>testApplication</code>, ручные моки.</p>
-<h2 id="integration-тесты-bruno-manual-cli">2. Integration-тесты Bruno
-(manual + CLI)</h2>
-<p>В каталоге <a
-href="../bruno/highload-invest/"><code>backend/bruno/highload-invest/</code></a>
-лежит Bruno collection, покрывающая основные API-сценарии:</p>
-<ul>
-<li><code>api-gateway/health.bru</code>,
-<code>api-gateway/get-all-quotes.bru</code>,
-<code>get-quote-by-ticker.bru</code>, <code>get-candles.bru</code></li>
-<li><code>core-banking/health.bru</code>, <code>create-user.bru</code>,
-<code>create-trade.bru</code>, <code>sell-trade.bru</code>,
-<code>get-portfolio.bru</code></li>
-</ul>
-<p>Окружение <code>environments/local.bru</code> указывает на локальный
-compose, <code>environments/staging.bru</code> (если будет добавлено) —
-на staging.</p>
-<p>CLI-прогон:</p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> backend/bruno/highload-invest</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bru</span> run <span class="at">--env</span> local</span></code></pre></div>
-<h2 id="end-to-end-сценарии">3. End-to-end сценарии</h2>
-<h3 id="smoke">Smoke</h3>
-<p><code>backend/scripts/smoke-traffic.sh</code> — короткий burst
-запросов (create-user → deposit → BUY×2 → SELL → portfolio → quotes),
-используется для проверки трассы Jaeger и метрик Grafana после
-деплоя.</p>
-<h3 id="driver-клиент-после-phase-3">Driver → клиент (после Phase
-3)</h3>
-<p>Сценарий <strong>«генерация котировки → клиент»</strong>:</p>
-<ol type="1">
-<li>На сервере <code>quotes_ctl --start --rate 1000</code></li>
-<li><code>go-ingestion</code> читает <code>/dev/quotes</code>,
-складывает в ClickHouse, публикует в Redis</li>
-<li><code>api-gateway</code> подписан на Redis pubsub → broadcast по
-<code>/ws/quotes</code></li>
-<li>Клиент подключается на <code>ws://2.26.49.82/ws/quotes</code> и
-фиксирует первый апдейт</li>
-</ol>
-<p>NFR-001 проверяется через лог-таймстемпы драйвера и WS-клиента, а
-также через Jaeger (<code>go-ingestion → api-gateway</code> span).</p>
-<h2 id="нагрузочное-тестирование-nfr-002">4. Нагрузочное тестирование
-(NFR-002)</h2>
-<h3 id="инструмент">Инструмент</h3>
-<p><code>backend/load-tester</code> — Kotlin-приложение, использующее
-Ktor HTTP-клиент. Параметризация через env переменные:</p>
+<tr>
+<td>NFR-03</td>
+<td>Consistency</td>
+<td>Финансовые данные должны сохранять ACID-согласованность.</td>
+<td>Core Banking выполняет сделки в транзакции PostgreSQL с блокировками <code>SELECT ... FOR UPDATE</code>.</td>
+</tr>
+<tr>
+<td>NFR-04</td>
+<td>Consistency</td>
+<td>Market-data контур может иметь eventual consistency и потерю промежуточных realtime-событий, но исторические котировки должны сохраняться в ClickHouse.</td>
+<td>Сравнение данных WebSocket, REST API и таблицы <code>quotes</code> в ClickHouse.</td>
+</tr>
+<tr>
+<td>NFR-05</td>
+<td>Observability</td>
+<td>Поведение backend и ingestion должно быть наблюдаемым через метрики и распределённые трассы.</td>
+<td>Наличие Grafana dashboard, Prometheus metrics и Jaeger traces.</td>
+</tr>
+<tr>
+<td>NFR-06</td>
+<td>Operability</td>
+<td>Система должна воспроизводимо разворачиваться из репозитория.</td>
+<td>Запуск стенда через <code>docker compose up -d --build</code> без ручной установки БД и observability-инструментов.</td>
+</tr>
+<tr>
+<td>NFR-07</td>
+<td>Reliability</td>
+<td>При недоступности <code>/dev/quotes</code> демонстрационный стенд должен иметь fallback-режим генерации котировок.</td>
+<td>Ingestion запускается без драйвера и всё равно публикует котировки в ClickHouse/Redis.</td>
+</tr>
+<tr>
+<td>NFR-08</td>
+<td>Maintainability</td>
+<td>Архитектура должна явно разделять уровни: kernel/device, ingestion, storage, domain, API, UI и observability.</td>
+<td>C4-диаграммы и структура кода не смешивают физические устройства, СУБД, доменные операции и UI.</td>
+</tr>
+<tr>
+<td>NFR-09</td>
+<td>Reliability</td>
+<td>Система должна различать допустимые и недопустимые потери данных.</td>
+<td>Потеря WebSocket-сообщения котировки допустима; потеря или частичное применение финансовой транзакции недопустимы.</td>
+</tr>
+<tr>
+<td>NFR-10</td>
+<td>Testability</td>
+<td>Критичные сценарии должны быть проверяемы автоматическими или воспроизводимыми ручными тестами.</td>
+<td>Unit/integration tests, Bruno/API-запросы, load-tester, Jaeger/Grafana evidence.</td>
+</tr>
+<tr>
+<td>NFR-11</td>
+<td>Documentation</td>
+<td>Архитектура должна быть описана в C4-модели и связана с требованиями.</td>
+<td>В отчёте представлены C4 Level 1/2/3, SRS-таблицы требований и описание основных потоков данных.</td>
+</tr>
+</tbody></table>
+<h1 id="sec-10">Описание архитектуры</h1>
+<h2 id="sec-11">Архитектурная идея</h2>
+<p>Архитектура построена как микросервисная система, так как практическое задание
+требует разные языки и технологии для разных частей проекта. Драйвер Linux
+генерирует котировки на низком уровне, Go-сервис отвечает за быструю загрузку
+потока данных, Kotlin-сервисы реализуют API и бизнес-операции, а мобильные
+клиенты используют единый контракт backend.</p>
+<h2 id="sec-12">Архитектура в модели C4</h2>
+<p>Для фиксации архитектуры используется модель C4. Она позволяет описать систему
+на нескольких уровнях детализации: от окружения и внешних пользователей до
+контейнеров и внутренних компонентов отдельных сервисов.</p>
+<h3 id="sec-13">Уровень 1. System Context</h3>
+<p>На контекстной диаграмме торговая платформа представлена как единая система.
+Основной пользователь — клиент-трейдер мобильного приложения. Пользователь
+получает котировки, просматривает портфель и выполняет учебные операции с
+бумагами через HTTPS и WebSocket. Отдельно показана внешняя система мониторинга,
+куда платформа передаёт метрики, трейсы и логи через OpenTelemetry.</p>
+<figure><img src="C4diagram/L1.png" alt="Рисунок 1 - C4 Level 1: контекст системы" style="width:95%;"><figcaption>Рисунок 1 - C4 Level 1: контекст системы</figcaption></figure><h3 id="sec-14">Уровень 2. Container</h3>
+<p>Контейнерная диаграмма раскрывает состав торговой платформы. Клиентский уровень
+включает нативное Android-приложение и React Native-приложение. Единой точкой
+входа для клиентов выступает API Gateway на Kotlin/Ktor: он принимает REST- и
+WebSocket-запросы, маршрутизирует их к сервисам домена и отдаёт котировки.</p>
+<p>Backend разделён на сервисы с разной ответственностью. Auth Service отвечает за
+пользовательские профили, аутентификацию и сессии. Trade Service выполняет
+операции с ордерами, портфелем и балансами. В реализации эти доменные функции
+развёрнуты в контейнере Core Banking, а на C4-диаграмме показаны как отдельные
+логические сервисы, чтобы явно зафиксировать границу ответственности. Quotes
+Service на Go читает поток котировок из Linux-драйвера, записывает историю в
+ClickHouse и обновляет горячий кэш Redis/KeyDB. Telemetry Collector агрегирует
+телеметрию от сервисов и передаёт её в контур наблюдаемости.</p>
+<figure><img src="C4diagram/L2.png" alt="Рисунок 2 - C4 Level 2: контейнеры системы" style="width:100%;"><figcaption>Рисунок 2 - C4 Level 2: контейнеры системы</figcaption></figure><h3 id="sec-15">Уровень 3. Component</h3>
+<p>На уровне компонентов детализированы сервисы, которые несут основную
+архитектурную нагрузку: API Gateway, Linux Quotes Driver, Quotes Service,
+Auth Service и Trade Service.</p>
+<h4>API Gateway</h4>
+<p>API Gateway состоит из REST Controller, Auth Middleware, Service Router, Rate
+Limiter, WebSocket Controller и Redis Subscriber. REST Controller принимает
+HTTP-запросы, Auth Middleware проверяет JWT и сессии, Rate Limiter ограничивает
+частоту запросов на клиента. Service Router маршрутизирует операции в Auth и
+Trade сервисы. WebSocket Controller транслирует котировки клиентам, а Redis
+Subscriber подписывается на каналы котировок для push-обновлений.</p>
+<figure><img src="C4diagram/L3.1.png" alt="Рисунок 3 - C4 Level 3: компоненты API Gateway" style="width:100%;"><figcaption>Рисунок 3 - C4 Level 3: компоненты API Gateway</figcaption></figure><h4>Linux Quotes Driver</h4>
+<p>Linux Quotes Driver реализован как kernel module на C. Внутри контейнера
+выделены Char Device <code>/dev/quotes</code>, компонент генерации котировок и кольцевой
+буфер. Генератор по таймеру создаёт синтетические котировки, буфер хранит
+последние значения, а character device предоставляет пользовательскому
+пространству файловый интерфейс <code>open/read/release/ioctl</code>.</p>
+<figure><img src="C4diagram/L3.2.png" alt="Рисунок 4 - C4 Level 3: компоненты Linux Quotes Driver" style="width:85%;"><figcaption>Рисунок 4 - C4 Level 3: компоненты Linux Quotes Driver</figcaption></figure><h4>Quotes Service</h4>
+<p>Quotes Service на Go выполняет потоковую обработку котировок. Device Reader
+читает байты из <code>/dev/quotes</code>, Quote Parser преобразует бинарные данные в
+структуру котировки, Batch Writer пакетно сохраняет историю в ClickHouse, а
+Cache Writer обновляет Redis/KeyDB и публикует события по каналам котировок.
+Metrics Exporter фиксирует задержки, пропускную способность и ошибки.</p>
+<figure><img src="C4diagram/L3.3.png" alt="Рисунок 5 - C4 Level 3: компоненты Quotes Service" style="width:100%;"><figcaption>Рисунок 5 - C4 Level 3: компоненты Quotes Service</figcaption></figure><h4>Auth Service</h4>
+<p>Auth Service обрабатывает регистрацию, вход, обновление токенов и управление
+профилем. Auth Controller и User Controller принимают внутренние HTTP-запросы от
+API Gateway. Auth Orchestrator координирует регистрацию, проверку учётных
+данных, выпуск и отзыв токенов. Token Service работает с JWT, Password Hasher
+отвечает за безопасное хеширование паролей, а Session Repository и User
+Repository выполняют операции с таблицами <code>sessions</code> и <code>users</code> в PostgreSQL.</p>
+<figure><img src="C4diagram/L3.4.png" alt="Рисунок 6 - C4 Level 3: компоненты Auth Service" style="width:100%;"><figcaption>Рисунок 6 - C4 Level 3: компоненты Auth Service</figcaption></figure><h4>Trade Service</h4>
+<p>Trade Service отвечает за торговые операции и состояние портфеля. Order
+Controller принимает команды создания, чтения и отмены ордеров. Order Processor
+валидирует ордер, проверяет баланс и выполняет списание или блокировку средств.
+Price Checker получает актуальную цену тикера из Redis/KeyDB. Balance Manager
+управляет изменениями баланса, Portfolio Manager рассчитывает позиции, P&amp;L и
+среднюю цену входа, а SQL Repository сохраняет ордера, портфели и балансы в
+PostgreSQL.</p>
+<figure><img src="C4diagram/L3.5.png" alt="Рисунок 7 - C4 Level 3: компоненты Trade Service" style="width:100%;"><figcaption>Рисунок 7 - C4 Level 3: компоненты Trade Service</figcaption></figure><h2 id="sec-16">Основные потоки данных</h2>
+<p>Котировки идут по контуру <code>driver -&gt; ingestion -&gt; ClickHouse -&gt; API Gateway -&gt; mobile clients</code>. Для ускорения выдачи текущих данных и WebSocket-уведомлений
+используется Redis.</p>
+<p>Торговые операции идут по контуру <code>mobile client -&gt; API Gateway -&gt; Core Banking -&gt; PostgreSQL</code>. PostgreSQL выбран для пользовательских данных, потому что
+балансы и портфель требуют транзакционной согласованности.</p>
+<p>Диаграммы C4 выше фиксируют статическую структуру системы, а потоки данных
+показывают, как эти контейнеры взаимодействуют во время выполнения основных
+сценариев.</p>
+<h2 id="sec-17">Хранилища данных</h2>
+<p>ClickHouse хранит поток котировок и историю цен. PostgreSQL хранит пользователей,
+счета, сделки и портфель. Redis используется как кэш и канал Pub/Sub для
+уведомления API Gateway о новых котировках.</p>
 <table>
-<colgroup>
-<col style="width: 31%" />
-<col style="width: 39%" />
-<col style="width: 28%" />
-</colgroup>
 <thead>
 <tr>
-<th>Переменная</th>
-<th>По умолчанию</th>
+<th>Хранилище</th>
+<th>Назначение</th>
+<th>Причина выбора</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ClickHouse</td>
+<td>история котировок</td>
+<td>быстрые аналитические выборки по временным рядам</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>пользователи, счета, сделки</td>
+<td>транзакции и согласованность финансовых данных</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>кэш и Pub/Sub</td>
+<td>быстрые горячие данные и уведомления</td>
+</tr>
+</tbody></table>
+<h2 id="sec-18">Архитектурные ограничения</h2>
+<p>Генерация котировок отделена от бизнес-логики. Сервис ingestion не изменяет
+пользовательские данные, а Core Banking не пишет котировки. Такое разделение
+уменьшает связанность компонентов и упрощает проверку системы.</p>
+<h1 id="sec-19">Описание реализации</h1>
+<h2 id="sec-20">Backend</h2>
+<p>Backend состоит из двух развёртываемых Kotlin/Ktor-сервисов. API Gateway
+принимает запросы от мобильных приложений, отдаёт котировки и поддерживает
+WebSocket. Core Banking объединяет логические зоны Auth Service и Trade Service:
+обрабатывает регистрацию пользователей, пополнение учебного счёта, сделки и
+портфель.</p>
+<p>Основные endpoints:</p>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Маршрут</th>
 <th>Назначение</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td><code>GATEWAY_URL</code></td>
-<td><code>http://localhost:8080</code></td>
-<td>adress API Gateway</td>
+<tbody><tr>
+<td>GET</td>
+<td><code>/api/quotes</code></td>
+<td>текущие котировки</td>
 </tr>
 <tr>
-<td><code>BANKING_URL</code></td>
-<td><code>http://localhost:8081</code></td>
-<td>adress Core Banking (создание ботов)</td>
+<td>GET</td>
+<td><code>/api/quotes/{ticker}/candles</code></td>
+<td>свечи выбранного тикера</td>
 </tr>
 <tr>
-<td><code>BOT_COUNT</code></td>
-<td><code>100</code></td>
-<td>сколько одновременных «клиентов» эмулируется</td>
+<td>WS</td>
+<td><code>/ws/quotes</code></td>
+<td>realtime-обновления котировок</td>
 </tr>
 <tr>
-<td><code>DURATION_SEC</code></td>
-<td><code>60</code></td>
-<td>время прогона</td>
+<td>POST</td>
+<td><code>/api/users</code></td>
+<td>создание пользователя</td>
 </tr>
-</tbody>
-</table>
-<p>Бот выполняет случайные действия: 50% —
-<code>POST /api/trades</code>, 25% —
-<code>GET /api/portfolio/{id}</code>, 25% —
-<code>GET /api/quotes</code>. Метрики (success / errors / latency)
-выводятся в stdout.</p>
-<h3 id="лестница-прогонов">Лестница прогонов</h3>
-<p>Прогоны на dedicated-сервере <code>185.182.108.214</code> (8 vCPU
-2.4–4.0 ГГц, 16 GB RAM, NVMe Gen4). Все компоненты — на одном хосте:
-PostgreSQL 16, ClickHouse 25.7, Redis 7, otel-collector + Jaeger +
-Prometheus + Grafana, api-gateway/core-banking (systemd), go-ingestion
-(compose). Kernel-driver <code>quotes_driver.ko</code> загружен,
-<code>/dev/quotes</code> отдаёт данные.</p>
+<tr>
+<td>POST</td>
+<td><code>/api/accounts/{userId}/deposit</code></td>
+<td>учебное пополнение счёта</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/trades</code></td>
+<td>покупка или продажа лотов</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/portfolio/{userId}</code></td>
+<td>портфель пользователя</td>
+</tr>
+</tbody></table>
+<p>Финансовые операции выполняются в транзакции PostgreSQL. При покупке проверяется
+достаточность баланса, при продаже — количество доступных лотов. После проверки
+обновляется счёт, портфель и журнал сделок.</p>
+<h2 id="sec-21">Получение котировок</h2>
+<p>Драйвер Linux создаёт character device <code>/dev/quotes</code> и выдаёт строки с
+синтетическими котировками. Go-сервис читает устройство, формирует батчи,
+записывает данные в ClickHouse и публикует уведомления о новых котировках в
+Redis. Для локальной разработки предусмотрен fallback-режим генерации котировок,
+если драйвер недоступен.</p>
+<h2 id="sec-22">Мобильные приложения</h2>
+<p>Реализованы два клиента с одинаковым пользовательским сценарием:</p>
+<ul>
+<li>регистрация пользователя;</li>
+<li>просмотр списка котировок;</li>
+<li>просмотр графика выбранного актива;</li>
+<li>пополнение учебного счёта;</li>
+<li>покупка и продажа лотов;</li>
+<li>просмотр портфеля.</li>
+</ul>
+<p>Нативное приложение написано на Kotlin и Jetpack Compose. Кросс-платформенное
+приложение написано на React Native. Оба клиента работают с одним API, что
+позволяет проверять backend независимо от выбранного мобильного стека.</p>
+<h2 id="sec-23">Развёртывание</h2>
+<p>Система разворачивается через Docker Compose. В compose-стенд входят backend,
+Go ingestion, базы данных, Redis, сервис нагрузочного тестирования и компоненты
+наблюдаемости. Для драйвера используется отдельный compose override, так как
+kernel module требует доступа к ядру хоста.</p>
+<h2 id="sec-24">Наблюдаемость</h2>
+<p>В проекте реализован контур наблюдаемости на базе OpenTelemetry. Kotlin-сервисы
+API Gateway и Core Banking экспортируют telemetry-данные через OTLP gRPC на порт
+<code>4317</code>, а Go ingestion использует OTLP HTTP на порт <code>4318</code>. OpenTelemetry
+Collector принимает данные от сервисов, отправляет трассы в Jaeger и отдаёт
+метрики через Prometheus exporter для последующей визуализации в Grafana.</p>
+<p>Для HTTP-взаимодействия между API Gateway и Core Banking используется стандартный
+W3C Trace Context: заголовок <code>traceparent</code> позволяет связать span-ы одного
+пользовательского запроса в общую трассу. Для Redis Pub/Sub propagation не
+реализован, поэтому поток <code>go-ingestion -&gt; Redis -&gt; API Gateway WebSocket</code>
+отображается как несколько независимых trace-ов. Это ограничение допустимо для
+учебного стенда и зафиксировано как направление дальнейшего развития.</p>
+<p>На рисунке 8 показана трасса операции <code>POST /api/trades</code> в Jaeger UI. В ней
+виден серверный HTTP-span Core Banking и внутренний span <code>trade.execute</code>,
+который соответствует выполнению торговой операции и транзакционному обновлению
+данных пользователя.</p>
+<figure><img src="screenshots/jaeger-trade-trace.png" alt="Рисунок 8 - Трасса операции POST /api/trades в Jaeger UI" style="width:100%;"><figcaption>Рисунок 8 - Трасса операции POST /api/trades в Jaeger UI</figcaption></figure><p>На рисунке 9 показан список trace-ов Core Banking за последние 15 минут. Такие
+trace-ы появляются во время smoke-проверок и нагрузочных прогонов, что
+подтверждает прохождение telemetry-данных через OpenTelemetry Collector в
+Jaeger.</p>
+<figure><img src="screenshots/jaeger-core-banking-traces.png" alt="Рисунок 9 - Список trace-ов Core Banking в Jaeger UI" style="width:100%;"><figcaption>Рисунок 9 - Список trace-ов Core Banking в Jaeger UI</figcaption></figure><p>Grafana подключена к Prometheus и Jaeger через provisioning. На рисунке 10
+показан дашборд <code>HighLoad Invest - Backend Overview</code>, используемый для контроля
+runtime-метрик во время тестов: длительности торговых операций, сообщений Redis
+Pub/Sub, WebSocket-рассылки и активности backend-компонентов.</p>
+<figure><img src="screenshots/grafana-backend-overview.png" alt="Рисунок 10 - Дашборд HighLoad Invest Backend Overview в Grafana" style="width:100%;"><figcaption>Рисунок 10 - Дашборд HighLoad Invest Backend Overview в Grafana</figcaption></figure><p>На рисунке 11 показан список автоматически подготовленных дашбордов Grafana.
+Наличие дашборда после запуска стенда подтверждает, что provisioning Grafana
+срабатывает без ручной настройки UI.</p>
+<figure><img src="screenshots/grafana-dashboard-list.png" alt="Рисунок 11 - Auto-provisioned дашборды Grafana" style="width:100%;"><figcaption>Рисунок 11 - Auto-provisioned дашборды Grafana</figcaption></figure><h1 id="sec-25">Описание системы тестирования</h1>
+<h2 id="sec-26">Проверяемые сценарии</h2>
+<p>Тестирование было направлено на проверку требований из задания:</p>
+<ul>
+<li>запуск всего стенда через Docker Compose;</li>
+<li>доступность API Gateway и Core Banking;</li>
+<li>получение котировок через REST;</li>
+<li>получение realtime-обновлений через WebSocket;</li>
+<li>регистрация пользователя;</li>
+<li>учебное пополнение счёта;</li>
+<li>покупка лотов;</li>
+<li>проверка портфеля;</li>
+<li>запись котировок из ingestion в ClickHouse;</li>
+<li>работа драйвера Linux через <code>/dev/quotes</code>;</li>
+<li>нагрузочная проверка с имитацией большого числа клиентов.</li>
+</ul>
+<h2 id="sec-27">Smoke-тестирование</h2>
+<p>Smoke-тест проверяет минимальный пользовательский путь: создание пользователя,
+пополнение счёта, покупка актива и чтение портфеля. Успешный результат означает,
+что API Gateway, Core Banking и PostgreSQL работают согласованно.</p>
+<h2 id="sec-28">Проверка котировок</h2>
+<p>Для проверки потока котировок контролируется три точки: наличие данных в
+<code>/dev/quotes</code>, рост числа строк в ClickHouse и выдача актуальных котировок через
+<code>GET /api/quotes</code>. WebSocket проверяется по факту получения клиентом сообщений
+из <code>/ws/quotes</code>.</p>
+<h2 id="sec-29">Нагрузочное тестирование</h2>
+<p>Нагрузочный тест выполняется сервисом-имитатором клиентов
+<code>backend/load-tester</code>. Он создаёт логических пользователей и отправляет
+REST/WebSocket-запросы к API Gateway. Параметры запуска задаются переменными
+окружения: <code>BOT_COUNT</code>, <code>DURATION_SEC</code>, <code>CREATE_PARALLELISM</code>,
+<code>ACTIVE_REQUESTS</code>, <code>WS_PERCENT</code>, <code>REQUEST_DELAY_MIN_MS</code>,
+<code>REQUEST_DELAY_MAX_MS</code>.</p>
 <table>
-<colgroup>
-<col style="width: 15%" />
-<col style="width: 14%" />
-<col style="width: 15%" />
-<col style="width: 11%" />
-<col style="width: 15%" />
-<col style="width: 7%" />
-<col style="width: 18%" />
-</colgroup>
 <thead>
 <tr>
-<th>BOT_COUNT</th>
-<th>DURATION</th>
-<th>Total req</th>
-<th>Errors</th>
-<th>Error rate</th>
-<th>RPS</th>
-<th>Avg latency</th>
+<th>Сценарий</th>
+<th>Результат</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td>100</td>
-<td>20 s</td>
-<td>2 884</td>
-<td>0</td>
-<td>0.00 %</td>
-<td>144</td>
-<td>14 ms</td>
+<tbody><tr>
+<td>Короткая проверка REST и WebSocket</td>
+<td>701 успешный запрос, 0 ошибок, 220 WebSocket-сообщений</td>
 </tr>
 <tr>
-<td><strong>1 000</strong></td>
-<td>60 s</td>
-<td><strong>20 110</strong></td>
-<td><strong>0</strong></td>
-<td><strong>0.00 %</strong></td>
-<td><strong>335</strong></td>
-<td><strong>24 ms</strong></td>
+<td>Проверка 10 000 логических клиентов</td>
+<td>3469 успешных REST-запросов, 0 ошибок</td>
+</tr>
+</tbody></table>
+<p>Полученный результат подтверждает работоспособность стенда при имитации 10 000
+логических клиентов. Число одновременно активных запросов ограничивается
+параметрами load tester, чтобы тест отражал контролируемую нагрузку, а не
+исчерпание ресурсов тестовой машины.</p>
+<p>Дополнительно был выполнен каскад прогонов на staging-сервере с конфигурацией
+8 vCPU, 16 GB RAM и NVMe. Нагрузка распределялась между основными сценариями:
+получение котировок, чтение портфеля и создание торговых операций.</p>
+<table>
+<thead>
+<tr>
+<th align="right">Боты</th>
+<th align="right">Длительность</th>
+<th align="right">Всего запросов</th>
+<th align="right">Ошибки</th>
+<th align="right">Error rate</th>
+<th align="right">RPS</th>
+<th align="right">Средняя задержка</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1 000</td>
+<td align="right">60 с</td>
+<td align="right">20 110</td>
+<td align="right">0</td>
+<td align="right">0,00 %</td>
+<td align="right">335</td>
+<td align="right">24 мс</td>
 </tr>
 <tr>
-<td><strong>5 000</strong></td>
-<td>120 s</td>
-<td><strong>71 544</strong></td>
-<td><strong>28</strong></td>
-<td><strong>0.04 %</strong></td>
-<td><strong>594</strong></td>
-<td><strong>225 ms</strong></td>
+<td align="right">5 000</td>
+<td align="right">120 с</td>
+<td align="right">71 544</td>
+<td align="right">28</td>
+<td align="right">0,04 %</td>
+<td align="right">594</td>
+<td align="right">225 мс</td>
 </tr>
 <tr>
-<td><strong>10 000</strong></td>
-<td>120 s</td>
-<td><strong>70 723</strong></td>
-<td><strong>18</strong></td>
-<td><strong>0.03 %</strong></td>
-<td><strong>590</strong></td>
-<td><strong>399 ms</strong></td>
+<td align="right">10 000</td>
+<td align="right">120 с</td>
+<td align="right">70 723</td>
+<td align="right">18</td>
+<td align="right">0,03 %</td>
+<td align="right">590</td>
+<td align="right">399 мс</td>
 </tr>
-</tbody>
-</table>
-<p>Параметры load-tester: - <code>ACTIVE_REQUESTS=200–300</code>
-параллельных воркеров (а не равно <code>BOT_COUNT</code>), каждый
-случайно выбирает userId из созданных и шлёт запрос: 40 %
-<code>GET /api/quotes</code>, 20 % <code>GET /api/portfolio/{id}</code>,
-40 % <code>POST /api/trades</code>. -
-<code>REQUEST_DELAY_MIN/MAX_MS=20/200</code> — задержка между запросами
-одного воркера. - <code>WS_PERCENT=0</code> для финальных прогонов:
-WebSocket-каналы тестировались отдельно smoke-traffic-ом (40 frames
-принято за 20 s при 100 ботах).</p>
-<h3 id="ресурсы-под-10k-нагрузкой">Ресурсы под 10K-нагрузкой</h3>
-<p><code>docker stats</code> снят в момент
-<code>success≈55K, rps≈582</code>:</p>
+</tbody></table>
+<p>Перед основной серией запускался baseline на 100 ботах в течение 20 секунд:
+2 884 запроса, 0 ошибок, средняя задержка 14 мс, 144 RPS. На максимальном
+прогоне host load average составил <code>25,83 / 18,45 / 8,86</code>, свободной памяти
+оставалось не менее 13 GB.</p>
 <table>
 <thead>
 <tr>
 <th>Контейнер</th>
-<th>CPU %</th>
-<th>RAM</th>
+<th align="right">CPU</th>
+<th align="right">RAM</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>highload-clickhouse</td>
-<td>35.4 %</td>
-<td>800 MB</td>
+<td align="right">35,4 %</td>
+<td align="right">800 MB</td>
 </tr>
 <tr>
 <td>highload-jaeger</td>
-<td>0.02 %</td>
-<td>398 MB</td>
+<td align="right">0,02 %</td>
+<td align="right">398 MB</td>
 </tr>
 <tr>
 <td>highload-postgres</td>
-<td>0.03 %</td>
-<td>105 MB</td>
+<td align="right">0,03 %</td>
+<td align="right">105 MB</td>
 </tr>
 <tr>
 <td>highload-otel-collector</td>
-<td>0.00 %</td>
-<td>63 MB</td>
+<td align="right">0,00 %</td>
+<td align="right">63 MB</td>
 </tr>
 <tr>
 <td>highload-grafana</td>
-<td>0.04 %</td>
-<td>51 MB</td>
+<td align="right">0,04 %</td>
+<td align="right">51 MB</td>
 </tr>
 <tr>
 <td>highload-prometheus</td>
-<td>0.00 %</td>
-<td>23 MB</td>
+<td align="right">0,00 %</td>
+<td align="right">23 MB</td>
 </tr>
 <tr>
 <td>highload-go-ingestion</td>
-<td>0.27 %</td>
-<td>8 MB</td>
+<td align="right">0,27 %</td>
+<td align="right">8 MB</td>
 </tr>
 <tr>
 <td>highload-redis</td>
-<td>0.63 %</td>
-<td>3 MB</td>
+<td align="right">0,63 %</td>
+<td align="right">3 MB</td>
 </tr>
-</tbody>
-</table>
-<p>Host load average: <code>25.83 / 18.45 / 8.86</code> (на 8 vCPU).
-Свободной памяти ≥ 13 GB.</p>
-<h3 id="узкие-места-и-наблюдения">Узкие места и наблюдения</h3>
+</tbody></table>
+<p>Основным узким местом оказался ClickHouse: запрос актуальных котировок через
+<code>SELECT ... LIMIT 1 BY ticker</code> создаёт заметную нагрузку при частом обращении к
+<code>/api/quotes</code>. Для дальнейшей оптимизации можно использовать Redis-кэш с малым
+TTL или materialized view в ClickHouse. PostgreSQL под торговой нагрузкой
+оставался стабильным, так как операции распределялись по разным пользователям и
+row-level locks не конфликтовали.</p>
+<p>Серия прогонов подтверждает выполнение требования по имитации 10 000 клиентов:
+на максимальном сценарии система обрабатывала около 590 запросов в секунду,
+сохраняла error rate 0,03 %, а средняя задержка оставалась ниже 1 секунды.</p>
+<h2 id="sec-30">Тестовое инструментальное обеспечение</h2>
+<p>Для ручных и автоматизированных проверок в проекте используются:</p>
 <ul>
-<li><strong>ClickHouse — главный потребитель CPU</strong> (35 %). Это
-объяснимо: <code>GET /api/quotes</code> делает
-<code>SELECT ... LIMIT 1 BY ticker</code> на каждый из ~600 запросов в
-секунду; <code>LIMIT 1 BY</code> агрегирует по всем партициям. На
-production-конфигурации это лечилось бы кэшированием в Redis (TTL ~500
-ms) или materialized view.</li>
-<li><strong>PostgreSQL держится в норме</strong> — 0.03 % CPU при
-сделках. <code>READ COMMITTED</code> + row-level lock на
-<code>accounts</code> срабатывают быстро, контеншена нет, потому что
-<code>userIds.random()</code> распределяет нагрузку по 10 000
-пользователям.</li>
-<li><strong>Latency растёт линейно с числом ботов</strong> (24 ms → 225
-ms → 399 ms), что соответствует Little’s Law для сети «ограниченное
-число воркеров → очередь запросов». Если поднять
-<code>ACTIVE_REQUESTS</code> пропорционально, latency стабилизируется,
-но возрастёт RPS до упора в ClickHouse.</li>
-<li><strong>Error rate &lt; 0.05 %</strong> на всех уровнях; ошибки —
-преимущественно
-<code>IllegalArgumentException("Insufficient lots")</code> в SELL когда
-бот SELL-ит больше, чем фактически держит (учётная локальная карта
-<code>positionsByUser</code> немного отстаёт от реального
-портфеля).</li>
+<li>unit-тесты Core Banking для покупки, продажи, проверки баланса и валидации
+количества лотов;</li>
+<li>Ktor <code>testApplication</code> для проверки <code>/health</code> API Gateway;</li>
+<li>userspace-тесты драйвера котировок;</li>
+<li>Bruno-коллекция <code>backend/bruno/highload-invest</code> для проверки REST-сценариев
+API Gateway и Core Banking;</li>
+<li>smoke-скрипт <code>backend/scripts/smoke-traffic.sh</code>, который выполняет короткий
+пользовательский путь и создаёт данные для Grafana/Jaeger;</li>
+<li>load tester <code>backend/load-tester</code> для параметризуемых нагрузочных прогонов.</li>
 </ul>
-<h3 id="соответствие-nfr-002">Соответствие NFR-002</h3>
-<p>ТЗ: «Throughput: система должна поддерживать стабильную работу при 10
-000 активных сессий (ботов)».</p>
-<p><strong>Подтверждено</strong>: при 10 000 ботов система обрабатывает
-≥590 запросов/сек с error rate 0.03 %. Latency 399 ms &lt; 1 s (NFR-001
-запас). Все компоненты healthy, нет OOM/crash, kernel-driver продолжает
-выдавать котировки в ClickHouse через go-ingestion параллельно с
-нагрузкой.</p>
-<h3 id="скриншоты">Скриншоты</h3>
-<p>Скриншоты Grafana дашборда «HighLoad Invest — Backend Overview»
-помещаются в <a href="img/"><code>backend/docs/img/</code></a> после
-прогонов:</p>
-<ul>
-<li><code>load-1k.png</code>, <code>load-5k.png</code>,
-<code>load-10k.png</code></li>
-<li><code>jaeger-trace-trade.png</code></li>
-</ul>
-<h2 id="observability-что-мы-можем-увидеть">5. Observability — что мы
-можем увидеть</h2>
-<p>После Phase 1 интеграции OpenTelemetry в системе доступны:</p>
-<ul>
-<li><strong>Traces</strong> (Jaeger UI на <code>/jaeger/</code>):
-<ul>
-<li>api-gateway HTTP request span → core-banking HTTP request span (W3C
-Trace Context)</li>
-<li><code>clickhouse.&lt;operation&gt;</code> span внутри
-api-gateway</li>
-<li><code>trade.execute</code> span внутри core-banking с PG-statements
-(<code>opentelemetry-jdbc</code>)</li>
-<li><code>clickhouse.insert_batch</code>, <code>redis.publish</code> в
-go-ingestion</li>
-</ul></li>
-<li><strong>Metrics</strong> (Prometheus / Grafana):
-<ul>
-<li>HTTP RPS / latency P50, P95, P99 —
-<code>http.server.request.duration</code> от ktor-instrumentation</li>
-<li><code>trades.success</code>, <code>trades.failed</code>,
-<code>trade.execute.duration</code></li>
-<li><code>clickhouse.query.duration</code>,
-<code>clickhouse.batch_size</code>,
-<code>clickhouse.insert.duration</code></li>
-<li><code>redis.pubsub.messages</code>,
-<code>redis.publish.duration</code></li>
-<li><code>ws.active_connections</code>,
-<code>ws.messages.broadcast</code></li>
-</ul></li>
-</ul>
-<p>Дашборд по умолчанию: «HighLoad Invest — Backend Overview»
-(provisioned из <a
-href="../otel/grafana/dashboards/highload-invest.json"><code>backend/otel/grafana/dashboards/highload-invest.json</code></a>).
-# DOC-002 — Сравнение Native vs Cross-platform клиентов</p>
-<blockquote>
-<p>Учебный документ к ТЗ HighLoad Invest, требование DOC-002
-«Сравнительная таблица сложности реализации нативного и
-кросс-платформенного клиента».</p>
-</blockquote>
-<p>В монорепо лежат две реализации одного и того же UI:</p>
-<ul>
-<li><a href="../mobile-native/"><code>mobile-native/</code></a> —
-Android Native, Kotlin + Jetpack Compose.</li>
-<li><a
-href="../mobile-react-native/"><code>mobile-react-native/</code></a> —
-Expo / React Native + TypeScript.</li>
-</ul>
-<p>Оба клиента ходят в один и тот же backend API
-(<code>http://185.182.108.214/</code>) — REST + WebSocket, никаких
-различий в контракте. Это даёт чистое сравнение «языка/фреймворка», а не
-различий в API.</p>
-<h2 id="краткая-сводка-по-критериям">1. Краткая сводка по критериям</h2>
-<table>
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 45%" />
-<col style="width: 36%" />
-</colgroup>
-<thead>
-<tr>
-<th>Критерий</th>
-<th>Kotlin + Jetpack Compose</th>
-<th>React Native + Expo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Язык</td>
-<td>Kotlin</td>
-<td>TypeScript</td>
-</tr>
-<tr>
-<td>Минимум платформы</td>
-<td>Android 8.0 (<code>minSdk 26</code>)</td>
-<td>Expo 55, RN 0.85</td>
-</tr>
-<tr>
-<td>Целевые платформы</td>
-<td>Только Android</td>
-<td>Android (в <code>app.json</code> пока), легко расширяется на
-iOS</td>
-</tr>
-<tr>
-<td>Входной порог</td>
-<td>Выше: Android Studio, Gradle, lifecycle</td>
-<td>Ниже: Node/npm, Expo CLI</td>
-</tr>
-<tr>
-<td>Скорость прототипирования</td>
-<td>Средняя</td>
-<td>Высокая (hot reload)</td>
-</tr>
-<tr>
-<td>Доступ к Android API</td>
-<td>Прямой, без bridge</td>
-<td>Через RN API / native modules</td>
-</tr>
-<tr>
-<td>UI-производительность</td>
-<td>Предсказуемая нативная отрисовка</td>
-<td>Достаточная для MVP, зависит от JS bridge</td>
-</tr>
-<tr>
-<td>Типизация</td>
-<td>Kotlin, строгая на этапе компиляции</td>
-<td>TypeScript, строгая в проекте</td>
-</tr>
-<tr>
-<td>Размер APK</td>
-<td>~6 MB</td>
-<td>~25 MB (RN bundle + JS engine)</td>
-</tr>
-<tr>
-<td>Холодный старт</td>
-<td>~1.5 c</td>
-<td>~3 c</td>
-</tr>
-<tr>
-<td>Сборка</td>
-<td>Android SDK 35 + JDK 17 + Gradle</td>
-<td><code>npm install</code> + <code>expo run:android</code></td>
-</tr>
-<tr>
-<td>Поддержка WebSocket</td>
-<td>OkHttp <code>WebSocket</code></td>
-<td>Стандартный <code>WebSocket</code> API</td>
-</tr>
-<tr>
-<td>Графики</td>
-<td>Compose Canvas</td>
-<td>View-based, без сторонних зависимостей</td>
-</tr>
-</tbody>
-</table>
-<h2 id="реализация-ключевых-функций">2. Реализация ключевых функций</h2>
-<h3 id="restwebsocket-api">REST/WebSocket API</h3>
-<table>
-<colgroup>
-<col style="width: 26%" />
-<col style="width: 26%" />
-<col style="width: 46%" />
-</colgroup>
-<thead>
-<tr>
-<th>Аспект</th>
-<th>Native</th>
-<th>React Native</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>HTTP-клиент</td>
-<td>OkHttp + <code>kotlinx.serialization</code></td>
-<td><code>fetch</code> + JSON.parse</td>
-</tr>
-<tr>
-<td>WebSocket</td>
-<td><code>OkHttpClient.newWebSocket()</code></td>
-<td><code>new WebSocket(...)</code></td>
-</tr>
-<tr>
-<td>Базовый URL</td>
-<td><code>BuildConfig.API_BASE_URL</code>
-(<code>buildConfigField</code>)</td>
-<td><code>EXPO_PUBLIC_API_BASE_URL</code> env /
-<code>expoConfig.extra.apiBaseUrl</code></td>
-</tr>
-<tr>
-<td>Сериализация моделей</td>
-<td><code>@Serializable data class Quote(...)</code> — compile-time</td>
-<td><code>type Quote = { ... }</code> — only TypeScript-time</td>
-</tr>
-</tbody>
-</table>
-<p>Native жёстче по типам: <code>kotlinx.serialization</code>
-отказывается парсить ответ при несовпадении схемы и кидает исключение в
-runtime, плюс рассогласование DTO ловится компилятором. RN доверяет JSON
-и получает <code>Quote</code> через <code>as</code>-каст.</p>
-<h3 id="управление-состоянием">Управление состоянием</h3>
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 50%" />
-<col style="width: 31%" />
-</colgroup>
-<thead>
-<tr>
-<th></th>
-<th>Native</th>
-<th>RN</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Контейнер</td>
-<td><code>BrokerViewModel : ViewModel</code> (Android lifecycle
-aware)</td>
-<td><code>useState</code> / <code>useEffect</code> в
-<code>App.tsx</code></td>
-</tr>
-<tr>
-<td>Концепция</td>
-<td>MVVM с <code>StateFlow</code> + coroutines</td>
-<td>Hooks + локальные React state</td>
-</tr>
-<tr>
-<td>Параллелизм</td>
-<td><code>viewModelScope.launch { ... }</code></td>
-<td><code>Promise</code> / <code>async/await</code></td>
-</tr>
-<tr>
-<td>Cleanup</td>
-<td>автоматически при <code>onCleared()</code></td>
-<td>руками в <code>useEffect</code>-cleanup</td>
-</tr>
-</tbody>
-</table>
-<p>Android-вариант более «архитектурно зрелый»: scope автоматически
-отменяется при destroy Activity. В RN это нужно делать вручную.</p>
-<h3 id="ui-слой">UI-слой</h3>
-<p>Обе версии рендерят: - список тикеров с ценой, - модалку
-покупки/продажи лотов, - блок «портфель» с балансом.</p>
-<p>В Native —
-<code>LazyColumn { items(quotes) { QuoteRow(...) } }</code>, в RN —
-<code>&lt;FlatList data={quotes} renderItem={...} /&gt;</code>. Compose
-<code>LazyColumn</code> re-composes только видимые элементы; RN
-<code>FlatList</code> тоже виртуализирует, но менее агрессивно.</p>
-<h2 id="сложность-реализации-lines-of-code">3. Сложность реализации
-(Lines of Code)</h2>
-<table>
-<colgroup>
-<col style="width: 31%" />
-<col style="width: 42%" />
-<col style="width: 26%" />
-</colgroup>
-<thead>
-<tr>
-<th>Файл</th>
-<th>Native</th>
-<th>RN</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Модели</td>
-<td><code>Models.kt</code> ~30 LOC</td>
-<td>в <code>api.ts</code> ~50 LOC</td>
-</tr>
-<tr>
-<td>API-клиент</td>
-<td><code>BrokerApi.kt</code> ~80 LOC</td>
-<td><code>api.ts</code> ~110 LOC</td>
-</tr>
-<tr>
-<td>State / VM</td>
-<td><code>BrokerViewModel.kt</code> ~70 LOC</td>
-<td>в <code>App.tsx</code> ~60 LOC</td>
-</tr>
-<tr>
-<td>UI</td>
-<td><code>MainActivity.kt</code> + Compose ~180 LOC</td>
-<td><code>App.tsx</code> ~360 LOC</td>
-</tr>
-<tr>
-<td><strong>Итого исходников</strong></td>
-<td><strong>~360 LOC, 4 файла</strong></td>
-<td><strong>~580 LOC, 3 файла + конфиги</strong></td>
-</tr>
-</tbody>
-</table>
-<p>В Native код разнесён по 4 модулям, в RN — большая часть логики и UI
-в одном <code>App.tsx</code>.</p>
-<h2 id="backend-готовность">4. Backend-готовность</h2>
-<p>API полностью готово для подключения обоих клиентов:</p>
-<div class="sourceCode" id="cb14"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 20 тикеров идут от kernel-driver через go-ingestion в ClickHouse</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> curl http://185.182.108.214/api/quotes <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;length&#39;</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORS preflight разрешён</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> curl <span class="at">-X</span> OPTIONS http://185.182.108.214/api/users <span class="dt">\</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">-H</span> <span class="st">&#39;Origin: http://10.0.2.2&#39;</span> <span class="at">-i</span> <span class="kw">|</span> <span class="fu">grep</span> Access-Control</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">Access-Control-Allow-Origin:</span> <span class="pp">*</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Access-Control-Allow-Methods:</span> DELETE, PUT</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Access-Control-Allow-Headers:</span> Authorization, Content-Type</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Полный flow create-user → trade → portfolio проверен</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> curl <span class="at">-sX</span> POST http://185.182.108.214/api/users <span class="at">-d</span> <span class="st">&#39;{&quot;username&quot;:&quot;smoke&quot;,&quot;email&quot;:&quot;x@x.test&quot;,&quot;initialBalance&quot;:1000000}&#39;</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="dt">{</span><span class="st">&quot;id&quot;</span><span class="dt">:</span><span class="st">&quot;0d3c94fb-...&quot;</span><span class="op">,</span><span class="st">&quot;balance&quot;</span><span class="dt">:1000000.0}</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> curl <span class="at">-sX</span> POST http://185.182.108.214/api/trades <span class="at">-d</span> <span class="st">&#39;{&quot;userId&quot;:&quot;0d3c94fb-...&quot;,&quot;ticker&quot;:&quot;MSFT&quot;,&quot;action&quot;:&quot;BUY&quot;,&quot;lots&quot;:2,&quot;pricePerLot&quot;:414.13}&#39;</span></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">{</span><span class="st">&quot;id&quot;</span><span class="dt">:</span><span class="st">&quot;640c87f0-...&quot;</span><span class="op">,</span><span class="st">&quot;totalAmount&quot;</span><span class="dt">:828.26}</span></span></code></pre></div>
-<p>WebSocket-маршрут <code>ws://185.182.108.214/ws/quotes</code>
-подтверждён: 4 010 frames за 20 c при 100 ботах с
-<code>WS_PERCENT=10</code>. См. <a
-href="../backend/docs/testing.md"><code>backend/docs/testing.md</code></a>.</p>
-<h2 id="сборка-и-запуск">5. Сборка и запуск</h2>
-<h3 id="native">Native</h3>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mobile-native</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> assembleDebug          <span class="co"># требует Android SDK 35 + JDK 17</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> install app/build/outputs/apk/debug/app-debug.apk</span></code></pre></div>
-<p>URL backend задаётся в <code>app/build.gradle.kts</code>:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>buildConfigField<span class="op">(</span><span class="st">&quot;String&quot;</span><span class="op">,</span> <span class="st">&quot;API_BASE_URL&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="sc">\&quot;</span><span class="st">http://185.182.108.214</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">)</span></span></code></pre></div>
-<p>Значение по умолчанию — <code>http://10.0.2.2:8080</code>
-(host-машина из эмулятора).</p>
-<h3 id="react-native">React Native</h3>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mobile-react-native</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install                                                    <span class="co"># ~539 пакетов</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run typecheck                                              <span class="co"># tsc --noEmit</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="va">EXPO_PUBLIC_API_BASE_URL</span><span class="op">=</span>http://185.182.108.214 <span class="ex">npm</span> run android</span></code></pre></div>
-<p>Подтверждено backend-командой: <code>npm install</code> отрабатывает
-чисто, <code>tsc --noEmit</code> проходит без ошибок (TypeScript
-6.0.3).</p>
-<h2 id="выводы">6. Выводы</h2>
-<table>
-<colgroup>
-<col style="width: 47%" />
-<col style="width: 52%" />
-</colgroup>
-<thead>
-<tr>
-<th>Критерий</th>
-<th>Победитель</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>UI-производительность</td>
-<td><strong>Native</strong> (Compose 60 fps без подготовки)</td>
-</tr>
-<tr>
-<td>Скорость разработки</td>
-<td><strong>RN</strong> (hot reload, hooks, нет XML-layout)</td>
-</tr>
-<tr>
-<td>Размер APK</td>
-<td><strong>Native</strong> (~6 MB vs ~25 MB)</td>
-</tr>
-<tr>
-<td>Кросс-платформенность</td>
-<td><strong>RN</strong> (один JS-код для Android и iOS)</td>
-</tr>
-<tr>
-<td>Безопасность типов</td>
-<td><strong>Native</strong> (compile-time
-<code>kotlinx.serialization</code>)</td>
-</tr>
-<tr>
-<td>Структура кода</td>
-<td><strong>Native</strong> (отдельные модули)</td>
-</tr>
-<tr>
-<td>LOC</td>
-<td><strong>Native</strong> короче, ~62 % от RN</td>
-</tr>
-</tbody>
-</table>
-<p>Для <strong>продакшен-брокера</strong> мы бы выбрали Native: критичны
-latency UI, предсказуемость GC и доступ к нативным API (BiometricAuth,
-push). Для <strong>MVP с быстрой итерацией</strong> — RN: одна команда
-пишет на TS, изменения катятся OTA-обновлениями Expo без обязательной
-публикации в Google Play.</p>
-<p>В рамках учебной задачи обе реализации эквивалентны по
-функциональности; различия — в подходе и стиле разработки. Это и
-является результатом DOC-002.</p>
-<h2 id="запуск-в-эмуляторе-для-команды-mobile">7. Запуск в эмуляторе
-(для команды mobile)</h2>
-<p>Backend-стенд уже готов. Команде mobile remains запустить эмулятор
-Pixel 7 / API 35 и провести демо-сценарий:</p>
-<ol type="1">
-<li><code>mobile-native</code>:
-<code>./gradlew assembleDebug &amp;&amp; adb install ...</code> →
-открыть приложение → создать пользователя → купить 2 лота MSFT →
-проверить портфель.</li>
-<li><code>mobile-react-native</code>:
-<code>EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214 npm run android</code>
-→ пройти тот же сценарий.</li>
-<li>Сделать скриншоты основных экранов и положить в
-<code>mobile-native/screens/</code> /
-<code>mobile-react-native/screens/</code>.</li>
+<h2 id="sec-31">Проверка сборки мобильных приложений</h2>
+<p>Для React Native выполнены установка зависимостей и TypeScript-проверка. Для
+нативного Android-клиента выполнена сборка debug APK в Docker-образе с Android
+SDK. Также собраны установочные APK для проверки на физическом Android-устройстве.</p>
+<h1 id="sec-32">Заключение</h1>
+<p>В ходе работы была разработана учебная экосистема для имитации трейдинга и
+инвестиций. В проект вошли два Android-клиента, Kotlin/Ktor backend, Go-сервис
+сбора котировок, Linux-драйвер на C, PostgreSQL, ClickHouse, Redis, контур
+наблюдаемости OpenTelemetry/Jaeger/Prometheus/Grafana и сервис нагрузочного
+тестирования.</p>
+<p>Система покрывает основные требования практического задания: получает котировки,
+отдаёт их клиентам, выполняет учебные торговые операции и проверяется нагрузочным
+тестом с имитацией 10 000 клиентов. Все основные компоненты разворачиваются через
+Docker Compose.</p>
+<p>Главный результат работы — не только готовый MVP, но и зафиксированная
+архитектура проекта: разделение ответственности между сервисами, отдельные
+хранилища для котировок и пользовательских данных, наблюдаемость runtime-сценариев
+и понятный контур тестирования.</p>
+<h1 id="sec-33">Список литературы</h1>
+<ol>
+<li><p>Мартин Р. Чистая архитектура. — СПб.: Питер, 2018.</p>
+</li>
+<li><p>Брукс Ф. Мифический человеко-месяц, или Как создаются программные системы. —
+СПб.: Символ-Плюс, 2010.</p>
+</li>
+<li><p>ГОСТ 7.32-2017. Отчёт о научно-исследовательской работе. Структура и правила
+оформления.</p>
+</li>
+<li><p>Ktor Documentation. — JetBrains. URL: <a href="https://ktor.io/docs/welcome.html">https://ktor.io/docs/welcome.html</a>.</p>
+</li>
+<li><p>Android Developers: Jetpack Compose. — Google.
+URL: <a href="https://developer.android.com/jetpack/compose">https://developer.android.com/jetpack/compose</a>.</p>
+</li>
+<li><p>React Native Documentation. — Meta. URL: <a href="https://reactnative.dev/docs/getting-started">https://reactnative.dev/docs/getting-started</a>.</p>
+</li>
+<li><p>ClickHouse Documentation. — ClickHouse Inc. URL: <a href="https://clickhouse.com/docs">https://clickhouse.com/docs</a>.</p>
+</li>
+<li><p>PostgreSQL Documentation. — PostgreSQL Global Development Group.
+URL: <a href="https://www.postgresql.org/docs/">https://www.postgresql.org/docs/</a>.</p>
+</li>
+<li><p>OpenTelemetry Documentation. — CNCF. URL: <a href="https://opentelemetry.io/docs/">https://opentelemetry.io/docs/</a>.</p>
+</li>
+<li><p>The Linux Kernel Module Programming Guide. URL:
+<a href="https://sysprog21.github.io/lkmpg/">https://sysprog21.github.io/lkmpg/</a>.</p>
+</li>
+<li><p>Jaeger Documentation. — CNCF. URL: <a href="https://www.jaegertracing.io/docs/">https://www.jaegertracing.io/docs/</a>.</p>
+</li>
+<li><p>Prometheus Documentation. URL: <a href="https://prometheus.io/docs/">https://prometheus.io/docs/</a>.</p>
+</li>
+<li><p>Grafana Documentation. URL: <a href="https://grafana.com/docs/">https://grafana.com/docs/</a>.</p>
+</li>
 </ol>
-<p>Backend-команда подтверждает готовность API: -
-<code>/banking/health</code>, <code>/gateway/health</code> → 200, -
-<code>/api/quotes</code> → 20 тикеров (живых, из kernel-driver), -
-полный flow проверен curl-ом и нагрузочным тестом 10 000 ботов (см.
-testing.md), - CORS открыт. # Заключение</p>
-<p>В ходе работы команда HighLoad Invest спроектировала и реализовала
-программно-аппаратный комплекс имитации биржевых торгов в полном
-соответствии с ТЗ:</p>
-<h2 id="достигнутые-результаты">Достигнутые результаты</h2>
-<p><strong>Backend-инфраструктура.</strong> Развёрнута микросервисная
-архитектура из пяти компонентов: api-gateway и core-banking на
-Kotlin/Ktor, go-ingestion на Go, kernel-driver на C и load-tester на
-Kotlin. Стек поднят docker-compose-ом на dedicated-сервере (8 vCPU, 16
-GB RAM); инфраструктура (PostgreSQL, ClickHouse, Redis) и observability
-(otel-collector, Jaeger, Prometheus, Grafana) — в том же compose. Перед
-сервисами nginx проксирует все REST/WS/UI-маршруты.</p>
-<p><strong>Полная интеграция OpenTelemetry (FR-OBS-01/02).</strong> В
-каждый Kotlin-сервис подключён SDK 1.46 с OTLP gRPC-экспортёром на 4317.
-В go-ingestion — OTLP HTTP на 4318. Custom span-ы обернули
-<code>trade.execute</code>, <code>clickhouse.&lt;op&gt;</code>,
-<code>redis.publish</code>, метрики домен-уровня
-(<code>trades.success</code>, <code>ws.active_connections</code>,
-<code>quotes.ingested</code> и т.д.). Trace propagation через W3C Trace
-Context связывает api-gateway → core-banking в единую трассу. В Jaeger
-видны все три сервиса, в Prometheus — 12 пользовательских метрик, в
-Grafana — auto-provisioned дашборд «HighLoad Invest — Backend
-Overview».</p>
-<p><strong>Подтверждённый NFR-002 — 10 000 сессий.</strong> Лестница
-нагрузочных прогонов 1 K → 5 K → 10 K показала:</p>
-<table>
-<thead>
-<tr>
-<th>Bots</th>
-<th>RPS</th>
-<th>Avg latency</th>
-<th>Errors</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1 000</td>
-<td>335</td>
-<td>24 ms</td>
-<td>0</td>
-</tr>
-<tr>
-<td>5 000</td>
-<td>594</td>
-<td>225 ms</td>
-<td>0.04 %</td>
-</tr>
-<tr>
-<td>10 000</td>
-<td>590</td>
-<td>399 ms</td>
-<td>0.03 %</td>
-</tr>
-</tbody>
-</table>
-<p>Система держит 10 000 параллельных ботов с error-rate ниже 0.05 % и
-latency, не превышающим 400 ms. Узкое место — ClickHouse
-<code>LIMIT 1 BY ticker</code> на каждый
-<code>/api/quotes</code>-запрос; в production-конфигурации это снимается
-Redis-кэшем или materialized view. PostgreSQL с
-<code>READ COMMITTED + SELECT FOR UPDATE</code> обработал ~30 K
-финансовых транзакций без блокировок и ACID-нарушений.</p>
-<p><strong>Реальный driver runtime.</strong> Kernel-module
-<code>quotes_driver.ko</code> собирается локально через
-<code>make all</code> (требует <code>linux-headers-$(uname -r)</code>),
-загружается через <code>insmod</code> и создаёт
-<code>/dev/quotes</code>. <code>dmesg</code> подтверждает корректную
-регистрацию символьного устройства. go-ingestion переключён на
-<code>QUOTES_DEVICE=/dev/quotes</code>, читает живые котировки и
-публикует их в ClickHouse + Redis. API возвращает 20 тикеров от драйвера
-(MSFT, INTC, AMD и т.д.); fallback-генератор остаётся в коде на случай
-отсутствия драйвера в локальной разработке.</p>
-<p><strong>Мобильные клиенты.</strong> Реализованы две версии: Native
-(Kotlin + Jetpack Compose, ~360 LOC, MVVM, OkHttp +
-kotlinx.serialization) и Cross-platform (React Native + Expo, ~580 LOC,
-hooks, fetch + WebSocket). Backend-команда подтвердила полную готовность
-API: все эндпоинты возвращают корректные ответы, CORS-preflight открыт,
-<code>/ws/quotes</code> пушит данные в realtime. Сравнительный анализ по
-DOC-002 показал, что для production-брокера предпочтительна
-Native-реализация, для MVP с быстрой итерацией — Cross-platform.</p>
-<h2 id="выявленные-ограничения-и-направления-развития">Выявленные
-ограничения и направления развития</h2>
+<h1 id="sec-34">Приложение А. Эссе</h1>
+<h4>Иллюзия абстракций, или Что мы программируем на самом деле</h4>
+<p>Современная индустрия разработки программного обеспечения, ведомая потребностями финтеха и монетизацией, породила целую армию специалистов, обученных решать шаблонные задачи в узком технологическом стеке. Как справедливо отмечает статистика, подавляющее большинство выпускников не обладает понятийным мышлением, что приводит к функциональной неграмотности: разработчик превращается в человека с молотком, для которого весь мир — гвозди. Чтобы выйти из этой парадигмы, необходимо прекратить рассматривать языки программирования как самоцель и начать воспринимать их через призму кибернетики, моделей вычислений (по Глушкову и Маркову) и глубины семантической пропасти между человеком и исполнителем.</p>
+<h5>1. Сравнительный анализ языков: JS, Kotlin, Go, C</h5>
+<p>Если отбросить синтаксический «мусор», любой язык программирования — это лишь инструмент для формализации сумбурной идеи в план работ для конкретного исполнителя. Разница между JS, Kotlin, Go и C заключается исключительно в толщине прослойки, модели вычислений и ширине семантической пропасти.</p>
 <ul>
-<li><strong>ClickHouse под <code>/api/quotes</code></strong> становится
-«узким горлышком» уже на 5 K ботов; следующим шагом — добавить Redis-кэш
-горячих котировок с TTL ~500 ms либо materialized view с
-агрегацией.</li>
-<li><strong>Redis Pub/Sub</strong> не персистентен: если api-gateway
-переподключается в момент PUBLISH, сообщение теряется. Для
-production-сценариев лучше Redis Streams.</li>
-<li><strong>Trace propagation через Redis Pub/Sub отсутствует</strong> —
-span go-ingestion-а и span api-gateway-WS-broadcast-а попадают в разные
-trace-ы. Решается переносом trace-id в JSON-payload сообщения.</li>
-<li><strong>Authentication не реализован</strong> — все эндпоинты
-открыты. Для учебной задачи это допустимо, для реальной эксплуатации
-добавить JWT в api-gateway и передавать
-<code>Authorization: Bearer ...</code> дальше.</li>
-<li><strong>Driver-генератор однопоточный</strong> и выдаёт
-фиксированные 20 тикеров; в реальном биржевом интерфейсе котировок было
-бы тысячи и kernel-thread-ов несколько.</li>
+<li><strong>C (Си):</strong> Это честный язык с «тонкой прослойкой». Исполнителем здесь выступает сам процессор (CPU). Семантическая пропасть между задачей прикладного уровня и языком Си огромна, потому что разработчик вынужден мыслить категориями аппаратного обеспечения (память, указатели, регистры). Этот язык не прощает функциональной неграмотности: он требует от инженера (тех самых 10% способных к системному мышлению) глубокого понимания того, как работает машина. </li>
+<li><strong>Go:</strong> Прагматичный компромисс. Прослойка все еще относительно тонка (язык компилируемый), но он предлагает четкую модель вычислений, основанную на взаимодействии независимых акторов (горутин) через связи (каналы). Это попытка индустрии дать разработчикам инструмент для управления хаосом параллелизма без необходимости лезть в дебри машинного кода, но и без тяжеловесных виртуальных сред.</li>
+<li><strong>Kotlin:</strong> Типичный продукт эпохи массового образования и сложных энтерпрайз-систем. Исполнителем здесь является не процессор, а «толстая прослойка» — виртуальная машина (JVM). Язык обладает высоким уровнем абстракции, что сильно сокращает семантическую пропасть: писать бизнес-логику на нем легче. Однако за это приходится платить колоссальной потерей контроля над реальным вычислительным процессом. Разработчик на Kotlin часто живет в иллюзии, что он управляет машиной, хотя на деле он лишь конфигурирует «прослойку», которая сама решает задачи сборки мусора и инициализации.</li>
+<li><strong>JS (JavaScript):</strong> Апофеоз уродливой вселенной современного IT. Язык с чудовищно толстой и непредсказуемой прослойкой (движки браузеров, V8). В терминах семиотического треугольника Огдена-Ричардса, семантика и прагматика JS исторически извращены: язык, созданный для примитивных анимаций, под давлением рынка натянули на серверную и сложную клиентскую логику. Разработчик здесь максимально оторван от реального исполнителя.</li>
 </ul>
-<h2 id="итог">Итог</h2>
-<p>Проект полностью покрывает учебные цели курса: студенты прошли через
-kernel space, high-throughput data ingestion, ACID-транзакции в
-реляционной БД, реактивный WebSocket fan-out, distributed tracing,
-нагрузочное тестирование и, наконец, два разных подхода к мобильной
-разработке. Все исходники и инструкции по запуску — в монорепо
-https://github.com/mike-yasnov/rmp-project. # Список литературы</p>
-<ol type="1">
-<li><p>Мартин, Р. С. Чистая архитектура / Р. С. Мартин. — СПб.: Питер,
-2018. — 352 с.</p></li>
-<li><p>Брукс, Ф. Мифический человеко-месяц, или Как создаются
-программные системы / Ф. Брукс. — СПб.: Символ-Плюс, 2010. — 304
-с.</p></li>
-<li><p>Лаврищева, Е. М. Программная инженерия и технологии
-программирования сложных систем: учебник для вузов / Е. М. Лаврищева. —
-2-е изд., испр. и доп. — М.: Юрайт, 2023. — 432 с.</p></li>
-<li><p>ГОСТ 19.201-78 «Техническое задание. Требования к содержанию и
-оформлению».</p></li>
-<li><p>ГОСТ 7.32-2017 «Система стандартов по информации, библиотечному и
-издательскому делу. Отчёт о научно-исследовательской работе. Структура и
-правила оформления».</p></li>
-<li><p>ГОСТ Р 7.0.80—2023 «Библиографическая запись».</p></li>
-<li><p><strong>Ktor — Asynchronous Framework for the connected
-systems</strong>. — JetBrains, 2026. URL: <a
-href="https://ktor.io/docs/welcome.html"
-class="uri">https://ktor.io/docs/welcome.html</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>Kotlin Coroutines and Flow</strong>. — JetBrains, 2026.
-URL: <a href="https://kotlinlang.org/docs/coroutines-overview.html"
-class="uri">https://kotlinlang.org/docs/coroutines-overview.html</a>
-(дата обращения: 06.05.2026).</p></li>
-<li><p><strong>ClickHouse documentation</strong>. — ClickHouse Inc.,
-2026. URL: <a href="https://clickhouse.com/docs"
-class="uri">https://clickhouse.com/docs</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>PostgreSQL 16 Documentation</strong>. — PostgreSQL Global
-Development Group, 2026. URL: <a
-href="https://www.postgresql.org/docs/16/"
-class="uri">https://www.postgresql.org/docs/16/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>HikariCP — Pool sizing rationale</strong>. — Brett
-Wooldridge, 2024. URL: <a
-href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing"
-class="uri">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing</a>
-(дата обращения: 06.05.2026).</p></li>
-<li><p><strong>Redis Pub/Sub &amp; Streams</strong>. — Redis Inc., 2026.
-URL: <a href="https://redis.io/docs/latest/develop/interact/pubsub/"
-class="uri">https://redis.io/docs/latest/develop/interact/pubsub/</a>
-(дата обращения: 06.05.2026).</p></li>
-<li><p><strong>OpenTelemetry Specification</strong>. — Cloud Native
-Computing Foundation, 2026. URL: <a
-href="https://opentelemetry.io/docs/"
-class="uri">https://opentelemetry.io/docs/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>OpenTelemetry Java instrumentation — Ktor
-server</strong>. — URL: <a
-href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/ktor"
-class="uri">https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/ktor</a>
-(дата обращения: 06.05.2026).</p></li>
-<li><p><strong>Linux Device Drivers, 3rd ed.</strong> / J. Corbet, A.
-Rubini, G. Kroah-Hartman. — O’Reilly, 2005. — Free online: <a
-href="https://lwn.net/Kernel/LDD3/"
-class="uri">https://lwn.net/Kernel/LDD3/</a>.</p></li>
-<li><p><strong>The Linux Kernel Module Programming Guide</strong>. —
-Sysprog21, 2024. URL: <a href="https://sysprog21.github.io/lkmpg/"
-class="uri">https://sysprog21.github.io/lkmpg/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>Jaeger — Distributed tracing platform</strong>. — CNCF,
-2026. URL: <a href="https://www.jaegertracing.io/docs/"
-class="uri">https://www.jaegertracing.io/docs/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>Prometheus — Monitoring system &amp; TSDB</strong>. —
-CNCF, 2026. URL: <a href="https://prometheus.io/docs/"
-class="uri">https://prometheus.io/docs/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>Grafana — Open observability platform</strong>. — Grafana
-Labs, 2026. URL: <a href="https://grafana.com/docs/"
-class="uri">https://grafana.com/docs/</a> (дата обращения:
-06.05.2026).</p></li>
-<li><p><strong>Expo SDK 55 documentation</strong>. — Expo, 2026. URL: <a
-href="https://docs.expo.dev/" class="uri">https://docs.expo.dev/</a>
-(дата обращения: 06.05.2026).</p></li>
-<li><p><strong>React Native 0.85</strong>. — Meta, 2026. URL: <a
-href="https://reactnative.dev/docs/getting-started"
-class="uri">https://reactnative.dev/docs/getting-started</a> (дата
-обращения: 06.05.2026).</p></li>
-<li><p><strong>Jetpack Compose</strong>. — Google, 2026. URL: <a
-href="https://developer.android.com/jetpack/compose"
-class="uri">https://developer.android.com/jetpack/compose</a> (дата
-обращения: 06.05.2026).</p></li>
-</ol>
+<h5>2. Что такое HTML и браузер на самом деле?</h5>
+<p>Исходя из фундаментальных основ программирования, где программа — это <em>вычислительный процесс</em>, преобразующий информацию (по Глушкову), мы должны признать страшную для многих фронтендеров правду.</p>
+<p><strong>HTML не является языком программирования.</strong> 
+В нем нет алгоритма, нет описания порядка действий исполнителя. HTML — это формализованный словарь, статический набор символов абстрактного алфавита. Это декларативное описание желаемого состояния (структуры), а не процесса. С точки зрения семиотики, HTML передает семантику (смысл элементов — заголовок, абзац), но лишен вычислительной прагматики.</p>
+<p><strong>Браузер — это гигантский Исполнитель-Костыль.</strong>
+Если при написании кода на Си программист сам формирует вычислительный процесс, то в случае с веб-разработкой <em>вычислительный процесс уже написан создателями браузера</em>. Браузер — это невероятно сложная, тяжеловесная виртуальная машина (прослойка), которая берет на вход примитивный текст (HTML) и самостоятельно решает, как именно задействовать ресурсы CPU/GPU для превращения этого текста в пиксели на экране.</p>
+<p>По сути, HTML и браузер — это идеальная система для эпохи функциональной неграмотности. Она создана для того, чтобы максимально изолировать человека от необходимости понимать, как устроен мир вычислительной техники. Разработчику не нужно думать об архитектуре, выделении памяти или рендеринге графов — достаточно просто &quot;накидать тегов&quot;, а всю интеллектуальную и алгоритмическую работу сделает Исполнитель (браузер). </p>
+<p><strong>Вывод:</strong>
+Современный стек (JS + HTML + Браузер или Kotlin + JVM) — это результат естественного отбора в IT-эволюции, где победила не инженерная элегантность, а способность бизнеса быстро утилизировать труд массово подготовленных «специалистов». Понимание того, <em>что</em> именно исполняет ваш код и <em>какая</em> под ним лежит модель вычисления — это та граница, которая отделяет ремесленника-кодера от настоящего инженера, обладающего понятийным мышлением.</p>
+
 </body>
 </html>

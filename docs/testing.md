@@ -46,7 +46,7 @@ Load tester имитирует клиентов через API Gateway, созд
 Короткая проверка:
 
 ```bash
-docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml run --rm \
+docker compose -f docker-compose.yml -f docker-compose.driver.yml run --rm \
   -e BOT_COUNT=50 \
   -e DURATION_SEC=10 \
   -e CREATE_PARALLELISM=20 \
@@ -58,7 +58,7 @@ docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-c
 Проверка 10k логических клиентов:
 
 ```bash
-docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml run --rm \
+docker compose -f docker-compose.yml -f docker-compose.driver.yml run --rm \
   -e BOT_COUNT=10000 \
   -e DURATION_SEC=15 \
   -e CREATE_PARALLELISM=100 \
@@ -91,7 +91,7 @@ curl 'http://localhost:8123/?query=SELECT%20count()%20FROM%20quotes'
 
 ```bash
 cd backend
-docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.driver.yml up -d --build
 ```
 
 Проверки:
@@ -138,7 +138,7 @@ docker run --rm -v "$PWD":/workspace -w /workspace \
 
 - `go test ./...` для `backend/go-ingestion`;
 - `docker compose config --quiet`;
-- `docker compose -f docker-compose.yml -f otel/docker-compose.otel.yml -f docker-compose.driver.yml config --quiet`;
+- `docker compose -f docker-compose.yml -f docker-compose.driver.yml config --quiet`;
 - `docker compose build` для `api-gateway`, `core-banking`, `go-ingestion`, `load-tester`;
 - `docker compose up -d` для backend;
 - smoke-сценарий регистрации, пополнения, покупки и портфеля;
