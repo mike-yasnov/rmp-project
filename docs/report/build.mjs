@@ -13,6 +13,8 @@ const inputs = [
   "docs/report/9A-references.md",
 ];
 
+const essayInput = "docs/report/essay/essay.md";
+
 function plantUmlUrl(source) {
   const encoded = deflateSync(Buffer.from(source, "utf8"))
     .toString("base64")
@@ -57,12 +59,22 @@ async function renderDiagrams(markdown) {
   return rendered;
 }
 
+function renderEssayAppendix(source) {
+  const essay = source.trim();
+  const normalizedEssay = essay.replace(/^(#{1,5})\s+/gm, (_match, hashes) => `${hashes}# `);
+
+  return `# Приложение А. Эссе\n\n${normalizedEssay}`.trimEnd();
+}
+
 const parts = [];
 
 for (const input of inputs) {
   const text = await readFile(path.join(root, input), "utf8");
   parts.push(text.trimEnd());
 }
+
+const essay = await readFile(path.join(root, essayInput), "utf8");
+parts.push(renderEssayAppendix(essay));
 
 const combined = `${parts.join("\n\n")}\n`;
 const rendered = await renderDiagrams(combined);
