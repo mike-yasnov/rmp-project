@@ -4,7 +4,7 @@ import { Candle, Order, Portfolio, Quote, User } from './types';
 const baseUrl: string =
   process.env.EXPO_PUBLIC_API_BASE_URL ??
   (Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined)?.apiBaseUrl ??
-  'http://10.0.2.2:8080';
+  'http://185.182.108.214:8080';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {

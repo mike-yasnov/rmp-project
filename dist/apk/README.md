@@ -6,101 +6,83 @@
 | `highload-invest-react-native-debug.apk` | ~50 MB | React Native + Expo | `com.highloadinvest.reactnative` | debug |
 | `highload-invest-react-native-release.apk` | ~58 MB | React Native + Expo | `com.highloadinvest.reactnative` | release |
 
-Debug-сборки подписаны Android debug keystore — годятся для эмулятора и тестирования. Release — оптимизированная и минифицированная, годится для распространения.
+`com.highloadinvest.nativeapp` и `com.highloadinvest.reactnative` имеют разные `applicationId` и могут стоять одновременно. Из RN-вариантов установится только один — последний установленный (debug перетирает release и наоборот).
 
-`com.highloadinvest.nativeapp` и `com.highloadinvest.reactnative` имеют разные `applicationId` и могут стоять одновременно. Из RN-вариантов установится только один — последний установленный.
+## Backend
 
-## ⚠️ Важно: APK ходят в `http://10.0.2.2:8080`
-
-Оба приложения собраны с зашитым URL backend:
+Все APK собраны с прод-URL:
 
 ```
-API_BASE_URL = http://10.0.2.2:8080
+API_BASE_URL = http://185.182.108.214:8080
 ```
 
-`10.0.2.2` — это **специальный alias Android-эмулятора**, который указывает на `localhost` хост-машины (того компа, где запущен эмулятор). Это **не** публичный адрес и **не** наш сервер.
+Сервер публичный, никаких туннелей не нужно — приложение подключается напрямую и в эмуляторе, и на физическом устройстве. Cleartext (`http://`) разрешён в манифесте обоих клиентов.
 
-Что это значит:
-- На физическом устройстве `10.0.2.2` ни во что не резолвится → приложение не подключится
-- В эмуляторе оно резолвится в `localhost` хоста → но на хосте на порту `8080` ничего не слушает, пока вы сами туда что-то не повесите
+Backend доступен и через nginx на порту 80 (`http://185.182.108.214/api/...`) — оба пути отдают одинаковые `/api/*` и `/ws/*`.
 
-Backend проекта живёт на `http://185.182.108.214:8080` (или `:80` через nginx). Чтобы приложение в него попало, нужно один из вариантов ниже.
+## Установка
 
----
+### В Android-эмуляторе
 
-## Вариант A. SSH-туннель (рекомендуется для эмулятора)
-
-Открываем туннель `localhost:8080` хост-машины → `185.182.108.214:8080` сервера. Эмулятор будет ходить на `10.0.2.2:8080` → `localhost:8080` хоста → SSH-туннель → сервер.
+Эмулятор должен быть запущен (`emulator -avd <name> &` или из Android Studio), затем:
 
 ```bash
-# В отдельном терминале — держим открытым, пока пользуемся приложением
-ssh -L 8080:localhost:8080 -N <user>@185.182.108.214
+adb install dist/apk/highload-invest-native-debug.apk
+adb install dist/apk/highload-invest-react-native-release.apk
 ```
 
-`-N` = «не открывать shell, только туннель». Закрыть — `Ctrl+C`.
-
-Проверка, что туннель встал:
+После установки приложения появятся в лаунчере. Можно запустить вручную или из терминала:
 ```bash
-curl http://localhost:8080/api/quotes | head
+adb shell am start -n com.highloadinvest.nativeapp/.MainActivity
+adb shell am start -n com.highloadinvest.reactnative/.MainActivity
 ```
 
-Должен прийти JSON со списком тикеров. После этого можно запускать приложение в эмуляторе.
+### На физическом устройстве
 
-**Почему именно SSH:** обычный `curl http://185.182.108.214:8080` с компа работает — но эмулятор ходит на `10.0.2.2`, не на публичный IP. Менять цель внутри APK без пересборки нельзя. Туннель решает это в одну команду без сборки.
+1. Включить «Отладку по USB» (Developer Options → USB debugging)
+2. Подключить кабель → подтвердить fingerprint компа на устройстве
+3. Проверить, что устройство видно: `adb devices` (должно показывать строку с `device`)
+4. `adb install dist/apk/...` — то же, что и для эмулятора
 
-**Если порт 8080 занят** (свой локальный backend крутится): остановите его или возьмите другой локальный порт + пересоберите APK (см. вариант C).
+Wi-Fi устройства и компа могут быть в разных сетях — это не имеет значения, потому что приложение ходит напрямую на публичный сервер `185.182.108.214`, а не через хост-машину.
 
----
+## Проверка, что backend жив
 
-## Вариант B. Wi-Fi-проброс на физическом устройстве
+```bash
+curl http://185.182.108.214:8080/api/quotes | head
+```
 
-`10.0.2.2` на телефоне не работает — алиас существует только в эмуляторе. Поэтому для физического устройства правильный путь — пересборка APK с другим URL (вариант C).
+Если в ответе JSON со списком тикеров (AAPL, MSFT, GOOG, …) — сервер работает, приложение подключится. Если timeout/connection refused — сервер лежит, любые APK дадут «Ошибка сети» при открытии экранов.
 
-Если очень хочется без пересборки и устройство подключено по USB — можно поднять SSH-туннель на хосте + `adb reverse`, но `10.0.2.2` всё равно нужно подменить на `localhost` в APK. На практике быстрее просто пересобрать.
+## Сценарий использования
 
----
+1. Установить APK
+2. Открыть приложение
+3. Зарегистрироваться (введите имя пользователя и e-mail) или войти
+4. Биржа → выбрать тикер → купить лот / выставить лимит-ордер
+5. Счёт → пополнить баланс / посмотреть портфель
 
-## Вариант C. Пересборка с публичным URL
+## Разработка локально
 
-Один раз меняем URL и кладём готовый APK на устройство. После этого никакие туннели не нужны — приложение ходит напрямую на сервер.
+Если хотите тестировать на собственном backend (поднятый рядом через `cd backend && docker compose up -d`), пересоберите APK с другим URL:
 
-Backend публично доступен на двух адресах:
-- `http://185.182.108.214` (порт 80, через nginx)
-- `http://185.182.108.214:8080` (api-gateway напрямую)
-
-Оба отдают идентичные `/api/*` и `/ws/*` — берите любой.
-
-### Native (Kotlin + Compose)
-
-В [`mobile-native/app/build.gradle.kts`](../../mobile-native/app/build.gradle.kts):
+**Native** ([`mobile-native/app/build.gradle.kts`](../../mobile-native/app/build.gradle.kts)):
 ```kotlin
-buildConfigField("String", "API_BASE_URL", "\"http://185.182.108.214:8080\"")
+buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
 ```
-
-Сборка:
 ```bash
-cd mobile-native
-./gradlew :app:assembleDebug
-adb install app/build/outputs/apk/debug/app-debug.apk
+cd mobile-native && ./gradlew :app:assembleDebug
 ```
 
-Manifest уже разрешает cleartext (`android:usesCleartextTraffic="true"`).
+`10.0.2.2` — спецадрес Android-эмулятора, указывающий на `localhost` хост-машины.
 
-### React Native (Expo)
-
-URL читается из env-переменной [`EXPO_PUBLIC_API_BASE_URL`](../../mobile-react-native/src/api.ts):
+**React Native** ([`mobile-react-native/.env`](../../mobile-react-native/.env)):
+```
+EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080
+```
 ```bash
-cd mobile-react-native
-EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214:8080 npm run android
+cd mobile-react-native && npm run android
 ```
-
-Или прописать в [`mobile-react-native/.env`](../../mobile-react-native/.env):
-```
-EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214:8080
-```
-и собрать обычным `npm run android`.
-
----
 
 ## Какие порты на сервере
 
@@ -114,13 +96,4 @@ EXPO_PUBLIC_API_BASE_URL=http://185.182.108.214:8080
 | `http://185.182.108.214/jaeger/` | Jaeger UI | публичный |
 | `http://185.182.108.214/grafana/` | Grafana | публичный |
 
-REST и WebSocket пути идентичны на портах 80 и 8080.
-
-## Быстрая шпаргалка
-
-| Сценарий | Что делать |
-|---|---|
-| Запустить готовый APK в эмуляторе | Поставить APK + поднять SSH-туннель (вариант A) |
-| Запустить на физ.устройстве | Пересобрать с `http://185.182.108.214:8080` (вариант C) |
-| Раздать APK без зависимостей от хоста | Пересобрать с `http://185.182.108.214:8080` (вариант C) и положить в `dist/apk/` |
-| Разрабатывать локально | Поднять `cd backend && docker compose up -d` — на хосте появится свой `localhost:8080`, и эмулятор уйдёт туда без туннеля |
+REST и WebSocket пути идентичны на 80 и 8080.

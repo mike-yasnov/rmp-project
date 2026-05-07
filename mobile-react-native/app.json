@@ -12,7 +12,7 @@
       "usesCleartextTraffic": true
     },
     "extra": {
-      "apiBaseUrl": "http://192.168.125.125:8080"
+      "apiBaseUrl": "http://185.182.108.214:8080"
     }
   }
 }
